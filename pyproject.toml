@@ -9,7 +9,7 @@ packages = [{include = "NPCpy"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-numpy = "^1.19.2"
+numpy = "^1.19.2, <= 1.23"
 circle-fit = "^0.2.0"
 pyyaml = "^6.0"
 scikit-learn = "^1.2.2"
