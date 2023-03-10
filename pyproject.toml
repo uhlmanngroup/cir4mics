@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "NPCpy"
+version = "0.1.0"
+description = "Simulating structurally variable NPCs for Microscopy"
+authors = ["MariaTheiss <theiss@ebi.ac.uk>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "NPCpy"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.19.2"
+circle-fit = "^0.2.0"
+pyyaml = "^6.0"
+scikit-learn = "^1.2.2"
+numba = "^0.56.4"
+seaborn = "^0.12.2"
+sympy = "^1.11.1"
+jupyterlab = "^3.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

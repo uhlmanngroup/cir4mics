@@ -1,0 +1,42 @@
+# if rel: Yes, use the first Nup in multi-channel simulations as a reference
+# This nup can thus be compared to equivalent single-channel simulations
+rel: No 
+
+# Geometric variability. Mean taken from input-model if null
+rvar: 
+    rnew: null # new mean radius
+    rsigma: null # new standard deviation of radius 
+
+# Twist between nucleoplasmic and cytoplasmic ring 
+thetavar:
+    thetanew: null # new twist-angle
+    thetasigma: null # Standar deviation of twist-angle
+
+# Distance between nucleoplasmic and cytoplasmic ring
+dvar:
+    dnew: null # new distance between NR and CR
+    dsigma: null # Standard deviation of distance between NR and CR
+
+
+symmet: 8 # rotational symmmetry, default 8 
+kappa:  null # tilt of CR and NR. lower number means more tilt. null is no tilt
+shiftsigma: null #standard deviation of shift between CR and NR in nm
+
+elliptvar:
+    elliptnew: null # New elongation. Correlates with elongation on final NPC
+    elliptsigma: null # Deviation of elongation
+
+# Controls Forces/offsets
+# Irregular variability    
+mag: 0 # forces in xy
+zmag: 0 # offsetin z 
+sigmamult: 0.5 # Correlation of forces and offsets by distance
+
+# Spring paramters
+nConnect: 2 # number of neighbours connected cw or acw
+damp: 1 # Damping of longest circumferential spring 
+kr: 0.7 # Damping of shortest circumferential spring
+
+# dynamics
+tlast: 20 # last timepoint for simulation. 
+step: 0.25 # timesteps for animation
