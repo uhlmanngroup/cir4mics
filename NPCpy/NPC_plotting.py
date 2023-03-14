@@ -57,21 +57,21 @@ def OffsetNPCs(NPCcoords, maxr):
     return NPCoffset
 
 
-def plotOverview(OffsetNPCs, NPCstest, var, membership = 0, anchor = True,  force = False,ellipse = False, circle = False):
+def plotOverview(OffsetNPCs, NPCs, var, width = 10, membership = 0, anchor = True,  force = False,ellipse = False, circle = False):
     """OffsetNPCs,
-    NPCstest, 
+    NPCs, 
     var
     """
-    fcoords = NPCstest["fcoords"]
+    fcoords = NPCs["fcoords"]
     forcecoords = DeformNPC.Multiple_coord(fcoords, var["symmet"]) 
 
-    OverviewPlot(OffsetNPCs, forcecoords, var["mag"], [0], membership,
+    OverviewPlot(OffsetNPCs, forcecoords, var["mag"], [0], membership, width, 
                                                anchor = True,  force = False,
                                                ellipse = False,
                                                circle = False)
 
 
-def OverviewPlot(NPCoffset, forces, mag, r, membership, anchor = False, force = False ,ellipse = False, circle = False):
+def OverviewPlot(NPCoffset, forces, mag, r, membership, width, anchor = False, force = False ,ellipse = False, circle = False):
     maxr = max(r)
     n = int(NPCoffset[-1, 4] + 1) # number of NPCs
     #NPCoffset = OffsetNPCs(NPCcoords, maxr)
@@ -79,9 +79,9 @@ def OverviewPlot(NPCoffset, forces, mag, r, membership, anchor = False, force = 
      # number of NPCs
     
     if n == 1: 
-        markersize = 100
+        markersize = 10 * width
     elif n <= 4:
-        markersize = 30
+        markersize = 2 * width
     else: markersize = 7
 
     # prepare to colourcode z position
@@ -93,8 +93,7 @@ def OverviewPlot(NPCoffset, forces, mag, r, membership, anchor = False, force = 
 
 
     # plot
-    plt.rcParams.update({'font.size': 50})
-    fig, ax = plt.subplots(1, 1, figsize = (25, 25))
+    fig, ax = plt.subplots(1, 1, figsize = (width, width))
     ax.set_title("mag " + str(mag))
 
     nupmarker = nupMarker()
@@ -244,9 +243,17 @@ def shifttilt_all_t(pos3D, nFrames, centre, tilt):
 
 
     
-def plotDetail(NPCscoords, NPCstest, var, NPCi, mode = "3D"):
+def plotDetail(NPCscoords, NPCs, var, NPCi, width = 4, mode = "3D"):
+    """
+    Input: 
+        - NPCscoords: Coordinates of all NPCs 
+        - NPCs: Dictionary containing info of all NPCs 
+        - var: simulation variables 
+        - NPCi: Index of NPC for which the plot should be generated
+        - mode: "3D" or "2D", default: 3D: 2D or 3D plot
+    """
+    
     NoneOrTilt = lambda a, i: a[i] if type(a) is not type(None) else None
-
 
     plotNPC = NPCscoords[NPCscoords[:,4] == NPCi]
     tiltnucv, tiltcytv = DeformNPC.tiltvectors(var["kappa"], var["n"], var["seed"])
@@ -255,20 +262,19 @@ def plotDetail(NPCscoords, NPCstest, var, NPCi, mode = "3D"):
     tiltcytv_i = NoneOrTilt(tiltcytv, NPCi)
 
     if mode == "2D":     
-        Plot2D(plotNPC, NPCstest["NPCs"][NPCi], NPCstest["zexp"], NPCstest["nupIndex"][NPCi], var["symmet"], var["nConnect"], 
+        Plot2D(plotNPC, NPCs["NPCs"][NPCi], NPCs["zexp"], NPCs["nupIndex"][NPCi], var["symmet"], var["nConnect"], 
                                                  tiltnucv_i, tiltcytv_i, shiftNuc[NPCi], shiftCyt[NPCi],
-                                                 forces = NPCstest["fcoords"][NPCi], showforce = False, 
+                                                 forces = NPCs["fcoords"][NPCi], showforce = False, 
                                                  legend = False, trajectory = True, 
-                                                 colourcode=True, springs = False, anchorsprings = False)
+                                                 colourcode=True, springs = False, anchorsprings = False, width = width)
     
     elif mode == "3D":
-        membership = NPCstest["ringmemall"][NPCscoords[:,4] == NPCi]
-       # membership = z_i_all[NPCscoords[:,4] == NPCi]
+        membership = NPCs["ringmemall"][NPCscoords[:,4] == NPCi]
         tiltnucv_i = NoneOrTilt(tiltnucv, NPCi)#tiltnucv[NPCi] if type(tiltnucv) is not type(None) else None
         tiltcytv_i = NoneOrTilt(tiltcytv, NPCi)
-        Plot3D(plotNPC, NPCstest["NPCs"][NPCi], NPCstest["nupIndex"][NPCi], var["nup"], var["term"], NPCstest["isnuc"], var["symmet"], 
+        Plot3D(plotNPC, NPCs["NPCs"][NPCi], NPCs["nupIndex"][NPCi], var["nup"], var["term"], NPCs["isnuc"], var["symmet"], 
                             tiltnucv_i, tiltcytv_i, shiftNuc[NPCi], shiftCyt[NPCi],
-                            NPCstest["fmags"][NPCi], NPCstest["fcoords"][NPCi], membership, plotforces = False, viewFrame = -1)
+                            NPCs["fmags"][NPCi], NPCs["fcoords"][NPCi], membership, plotforces = False, viewFrame = -1, width = width)
         
     
 
@@ -282,7 +288,7 @@ def nupColor():
 
 def Plot2D(plotNPC, solution, z, nup_i, symmet, nConnect, tiltnucv, tiltcytv, shiftNuc, shiftCyt, linestyle = "-", trajectory = True, 
            colourcode = True, springs = False, anchorsprings = False, markersize = 30, 
-           forces = 0, showforce = False, legend = False): # TODO 
+           forces = 0, showforce = False, legend = False, width = 5): # TODO 
     '''
     solution: Output of solve_ivp
     symmet: number of nodes per ring
@@ -295,9 +301,9 @@ def Plot2D(plotNPC, solution, z, nup_i, symmet, nConnect, tiltnucv, tiltcytv, sh
     '''
         
     nRings = len(z)
-    plt.rcParams.update({'font.size': 25})
+    #plt.rcParams.update({'font.size': 25})
 
-    fig, ax = plt.subplots(1, 1, figsize = (10, 10)) #16, 16
+    fig, ax = plt.subplots(1, 1, figsize = (width, width)) #16, 16
     viewFrame = -1# 0 is the first frame, -1 is the last frame  
     mainmarkercolor = ColourcodeZ(z)
     marker = nupMarker()
@@ -387,11 +393,18 @@ def Plot2D(plotNPC, solution, z, nup_i, symmet, nConnect, tiltnucv, tiltcytv, sh
     plt.tight_layout()
 
 
-def positionVStime(NPCstest, var, i, legend = False):
-    XYoverTime(NPCstest["NPCs"][i], symmet = 8, legend = legend)
+def positionVStime(NPCs, i, width = 3, legend = False):
+    """
+    NPCs: Dictionary containing info of all NPCs 
+    i: Index of NPC for which plot should be generated 
+    width: Width of each subplot 
+    legend: Show ledged. Default False 
+    """
+    symmet = len(NPCs["fmags"][i][0]) # length of array of deforming forces on NPC i ring 0. Should be equivalent to symmetry
+    XYoverTime(NPCs["NPCs"][i], symmet = symmet, width = width, legend = legend)
     
 
-def XYoverTime(solution, symmet , legend = False): #TODO: remove nRings
+def XYoverTime(solution, symmet, width = 5, legend = False): #TODO: remove nRings
     '''x and y positions over time'''
     
     nRings = len(solution)
@@ -400,7 +413,7 @@ def XYoverTime(solution, symmet , legend = False): #TODO: remove nRings
     l = 2-nRings%2
     rows, cols = sorted((int((nRings/l)), l))
 
-    fig, ax = plt.subplots(rows, cols, figsize = (10*rows, 10*cols))
+    fig, ax = plt.subplots(rows, cols, figsize = (width*rows, width*cols))
     palette = sns.color_palette("hsv", 2*symmet)
 
     for ring in range(nRings):
@@ -439,9 +452,10 @@ def XYoverTime(solution, symmet , legend = False): #TODO: remove nRings
 
 
 
-def Plot3D(plotNPC, solution, nup_i, nupname, termname, isnuc, symmet, tiltnucv, tiltcytv, shiftNuc, shiftCyt, fmags, fcoords, membership, plotforces = False, viewFrame = -1, colour = ["black", "gray"]):
+def Plot3D(plotNPC, solution, nup_i, nupname, termname, isnuc, symmet, tiltnucv, tiltcytv, 
+           shiftNuc, shiftCyt, fmags, fcoords, membership, plotforces = False, viewFrame = -1, colour = ["black", "gray"], width = 5):
     '''viewFrame: 0 is first frame, -1 is last frame'''
-    fig = plt.figure(figsize = (15,15))
+    fig = plt.figure(figsize = (width, width))
     ax = fig.add_subplot(111, projection='3d')
 
     linewidth = 3
@@ -583,11 +597,18 @@ def Plot3D(plotNPC, solution, nup_i, nupname, termname, isnuc, symmet, tiltnucv,
 
 #%matplotlib qt
     
-def AnimateDetail(NPCstest, var, NPCi, name = None):
-        AnimatedScatter(NPCstest["NPCs"][NPCi], 
+def AnimateDetail(NPCs, var, NPCi, name = None):
+    """
+    Input: 
+        - NPCs 
+        - var
+        - NPCi
+        - name: None or string. Output will be saved if name is string. Default None
+    """
+    AnimatedScatter(NPCs["NPCs"][NPCi], 
                                                           var["nConnect"], var["symmet"], 
-                                                          NPCstest["rexp"], NPCstest["fmags"][NPCi], 
-                                                          NPCstest["zexp"], NPCstest["nupIndex"][NPCi], name)
+                                                          NPCs["rexp"], NPCs["fmags"][NPCi], 
+                                                          NPCs["zexp"], NPCs["nupIndex"][NPCi], name)
         
 class AnimatedScatter(object):
     """An animated scatter plot using matplotlib.animations.FuncAnimation."""
@@ -615,7 +636,7 @@ class AnimatedScatter(object):
         # Setup the figure and axes...
         self.axscale = 1.25 * (np.amax(fmags) + max(r))
         self.fig, self.ax = plt.subplots(figsize = (10, 10))
-        plt.rcParams.update({'font.size': 20})
+        #plt.rcParams.update({'font.size': 20})
         
         # Then setup FuncAnimation.
         self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/nframes), 
@@ -713,9 +734,9 @@ if __name__ == '__main__':
     
  
 
-def AnimateOverview(NPCstest, OffsetNPCs, var):
+def AnimateOverview(NPCs, OffsetNPCs, var):
 
-    AnimateAll(NPCstest["NPCs"], OffsetNPCs, NPCstest["fcoords"], var["symmet"], NPCstest["rexp"], "name")
+    AnimateAll(NPCs["NPCs"], OffsetNPCs, NPCs["fcoords"], var["symmet"], NPCs["rexp"], "name")
  
  
     

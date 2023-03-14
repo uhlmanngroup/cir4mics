@@ -8,16 +8,8 @@ Created on Wed Mar  8 11:25:03 2023
 import yaml
 import DeformNPC
 
-def variables(working_dir, config):
-    
-    with open(working_dir + "/" + config) as file:
-    # The FullLoader parameter handles the conversion from YAML
-    # scalar values to Python the dictionary format
-        var = dict(yaml.load(file, Loader=yaml.FullLoader))
 
-    return var
-
-def variables2(config):
+def getVars(config):
     with open(config) as file: 
         var = dict(yaml.load(file, Loader=yaml.FullLoader))
 

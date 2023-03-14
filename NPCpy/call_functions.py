@@ -5,14 +5,11 @@ Created on Fri Feb 17 13:30:07 2023
 
 @author: maria
 """
-import os
-import sys
 
 
 #working_dir = '/home/maria/Documents/NPCPython' # Working directory (Location of NPC_overview_and_CSV.py)
 data_dir = '/home/maria/Documents/NPCPython/deletemedata2/' # Directory for output files
 config = 'config.yaml'
-histdata = 2
 
 #working= os.environ.get("WORKING_DIRECTORY", working_dir)
 #if len(sys.argv) > 1: working = sys.argv[1]
