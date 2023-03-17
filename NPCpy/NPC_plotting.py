@@ -511,8 +511,11 @@ def Plot3D(plotNPC, solution, nup_i, nupname, termname, isnuc, symmet, tiltnucv,
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
     
-            # Trajectories 
-    trajectory = True
+    # Trajectories 
+    if tiltcytv is not None or tiltnucv is not None or np.any(shiftCyt) or np.any(shiftNuc): 
+        trajectory = False
+    else: trajectory = True
+    
     if (trajectory):
             ### colourcoding velocities
         for i in range(len(solution)): # equals number of rings 
@@ -541,8 +544,8 @@ def Plot3D(plotNPC, solution, nup_i, nupname, termname, isnuc, symmet, tiltnucv,
                 lc.set_array(normvel[:, j])
                 line = ax.add_collection(lc) # TODO will only be saved for the last ring 
                    
-    axcb = fig.colorbar(line, ax=ax, shrink = 0.7, aspect = 50, ticks = [0], pad = 0.01)   
-    axcb.set_label('velocity (a.u.)')
+        axcb = fig.colorbar(line, ax=ax, shrink = 0.7, aspect = 50, ticks = [0], pad = 0.01)   
+        axcb.set_label('velocity (a.u.)')
 
     # color of edges that aren't axes 
     ax.xaxis.pane.set_edgecolor('w')
@@ -597,7 +600,7 @@ def Plot3D(plotNPC, solution, nup_i, nupname, termname, isnuc, symmet, tiltnucv,
 
 #%matplotlib qt
     
-def AnimateDetail(NPCs, var, NPCi, name = None):
+def AnimateDetail(NPCs, var, NPCi, width = 8, name = None):
     """
     Input: 
         - NPCs 
@@ -606,13 +609,13 @@ def AnimateDetail(NPCs, var, NPCi, name = None):
         - name: None or string. Output will be saved if name is string. Default None
     """
     AnimatedScatter(NPCs["NPCs"][NPCi], 
-                                                          var["nConnect"], var["symmet"], 
+                                       var["nConnect"], var["symmet"], 
                                                           NPCs["rexp"], NPCs["fmags"][NPCi], 
-                                                          NPCs["zexp"], NPCs["nupIndex"][NPCi], name)
+                                                          NPCs["zexp"], NPCs["nupIndex"][NPCi], width, name)
         
 class AnimatedScatter(object):
     """An animated scatter plot using matplotlib.animations.FuncAnimation."""
-    def __init__(self, solution, nConnect, symmet, r, fmags, z, nup_i, name):
+    def __init__(self, solution, nConnect, symmet, r, fmags, z, nup_i, width, name):
         self.solution = solution
         self.nRings = len(solution)
         self.anchors = np.zeros(3)#anchors
@@ -635,16 +638,24 @@ class AnimatedScatter(object):
         
         # Setup the figure and axes...
         self.axscale = 1.25 * (np.amax(fmags) + max(r))
-        self.fig, self.ax = plt.subplots(figsize = (10, 10))
+        self.fig, self.ax = plt.subplots(figsize = (width, width))
         #plt.rcParams.update({'font.size': 20})
         
         # Then setup FuncAnimation.
-        self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/nframes), 
-                                          init_func=self.setup_plot, blit=True, save_count=len(solution[0].t))
+        
         #HTML(self.ani.to_html5_video())
         
         #if name: self.ani.save(name + ".mp4", dpi = 250, fps = 50)
-        if name: self.ani.save(name + ".gif", fps = 50)
+        if name: 
+            self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/nframes), 
+                                              init_func=self.setup_plot, blit=True, save_count=len(solution[0].t))
+            self.ani.save(name + ".gif", fps = 50)
+       
+        else: 
+            self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/nframes), 
+                                              init_func=self.setup_plot, blit=True, save_count=len(solution[0].t))
+        
+       
         plt.show()
 
     def xydata(self):
@@ -734,15 +745,15 @@ if __name__ == '__main__':
     
  
 
-def AnimateOverview(NPCs, OffsetNPCs, var):
+def AnimateOverview(NPCs, OffsetNPCs, var, width = 8, name = None):
 
-    AnimateAll(NPCs["NPCs"], OffsetNPCs, NPCs["fcoords"], var["symmet"], NPCs["rexp"], "name")
+    AnimateAll(NPCs["NPCs"], OffsetNPCs, NPCs["fcoords"], var["symmet"], NPCs["rexp"], width, name)
  
  
     
 class AnimateAll(object):
     """An animated scatter plot using matplotlib.animations.FuncAnimation."""
-    def __init__(self, NPCs, OffsetNPCs, forcecoords, symmet, r, name ):
+    def __init__(self, NPCs, OffsetNPCs, forcecoords, symmet, r, width, name ):
           
         self.n = len(NPCs)
         self.tmax = len(NPCs[0][0].t)
@@ -792,9 +803,8 @@ class AnimateAll(object):
         self.yscale = round(max(self.xy[0][:, 1])) + marginm*self.maxr
         
         
-        self.fig, self.ax = plt.subplots(figsize = (10, 10))
-        plt.rcParams.update({'font.size': 20})
-       
+        self.fig, self.ax = plt.subplots(figsize = (width, width))
+        
         
         self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/self.tmax),
                                           init_func=self.setup_plot, blit=True, save_count=self.tmax)
