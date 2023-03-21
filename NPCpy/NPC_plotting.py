@@ -25,6 +25,7 @@ from sympy.ntheory import primefactors
 from scipy.stats import norm
 import copy 
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+import exportCSV
 
 
 Pos3D = DeformNPC.Pos3D
@@ -57,147 +58,148 @@ def OffsetNPCs(NPCcoords, maxr):
     return NPCoffset
 
 
-def plotOverview(OffsetNPCs, NPCs, var, width = 10, membership = 0, anchor = True,  force = False,ellipse = False, circle = False):
-    """OffsetNPCs,
-    NPCs, 
-    var
-    """
-    fcoords = NPCs["fcoords"]
-    forcecoords = DeformNPC.Multiple_coord(fcoords, var["symmet"]) 
-
-    OverviewPlot(OffsetNPCs, forcecoords, var["mag"], [0], membership, width, 
-                                               anchor = True,  force = False,
-                                               ellipse = False,
-                                               circle = False)
-
-
-def OverviewPlot(NPCoffset, forces, mag, r, membership, width, anchor = False, force = False ,ellipse = False, circle = False):
-    maxr = max(r)
-    n = int(NPCoffset[-1, 4] + 1) # number of NPCs
-    #NPCoffset = OffsetNPCs(NPCcoords, maxr)
-
-     # number of NPCs
+class plotOverview:
+    def __init__(self, OffsetNPCs, NPCs, var, width = 10, membership = 0, anchor = True,  
+                     force = False, ellipse = False, circle = False, view = "front"):
+        """OffsetNPCs,
+        NPCs, 
+        var
+        """
+        self.view = view 
+        fcoords = NPCs["fcoords"]
+        forcecoords = DeformNPC.Multiple_coord(fcoords, var["symmet"]) 
     
-    if n == 1: 
-        markersize = 10 * width
-    elif n <= 4:
-        markersize = 2 * width
-    else: markersize = 7
-
-    # prepare to colourcode z position
-    zs = NPCoffset[:,2]
-    nup_i = NPCoffset[:,3].astype(int)
+        self.OverviewPlot(OffsetNPCs, forcecoords, var["mag"], [0], membership, width, 
+                                                   anchor = True,  force = False,
+                                                   ellipse = False,
+                                                   circle = False)
     
-    zcolour = []    
-    zcolour.extend(ColourcodeZ(list(zs)))  
-
-
-    # plot
-    fig, ax = plt.subplots(1, 1, figsize = (width, width))
-    ax.set_title("mag " + str(mag))
-
-    nupmarker = nupMarker()
-    nupcolor = nupColor()
-
     
-    for i in np.unique(nup_i):
-        x = NPCoffset[nup_i==i][:, 0]
-        y = NPCoffset[nup_i==i][:, 1]
-        z = NPCoffset[nup_i==i][:, 2]
-        zcolour_subset = [zcolour[j] for j in range(len(zcolour)) if nup_i[j] == i ]
-        ax.scatter(x, y, c = zcolour_subset, s = 40*markersize, edgecolors = nupcolor[i], marker = nupmarker[i])
-
-
-    # # TODO: delete. this is just here because ax.y_lim doesn't work. 
-    # ax.scatter(-70, 0, c = "white", s = 0)
-    # ax.scatter(70, 0, c = "white", s = 0)
-    # ax.scatter(0, 70, c = "white", s = 0)
-    # ax.scatter(0, -70, c = "white", s = 0)
-
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    
-    # if anchor == True:
-    #     Ancoffset = OffsetNPCs(anchors, NPCs, maxr)
+    def OverviewPlot(self, NPCoffset, forces, mag, r, membership, width, anchor = False, force = False, ellipse = False, circle = False):
+        maxr = max(r)
+        n = int(NPCoffset[-1, 4] + 1) # number of NPCs
         
-    #     ax.scatter(Ancoffset[:,0], Ancoffset[:,1], c = "orange", s = 40*markersize)
-       
-    #     for i in range(len(Ancoffset)):
-    #         ax.plot([Ancoffset[i][0], NPCoffset[i][0]], [Ancoffset[i][1], NPCoffset[i][1]], linestyle = ":")
-        
-    if force == True: 
-        Forceoffset = OffsetNPCs(forces, maxr)
-        ax.scatter(Forceoffset[:,0], Forceoffset[:,1], c = "blue", s = 10*markersize)
-        
-    # fit circle and/or ellipse
-    if ellipse:
-        NPCs_ellipse = Analyse_deformed.Ellipses(NPCoffset, membership = membership)
-        if type(membership[0]) == np.str_: 
-            for i in range(n): 
-                for key in NPCs_ellipse:
-                    el = plotEllipse(NPCs_ellipse[key][i])
-                    alpha = [float(i) for i in ColourcodeZ(el[:,2])]
-                    ax.scatter(el[:,0], el[:, 1], lw = 2, c = "g", alpha = alpha)
-                
+        if n == 1: 
+            markersize = 10 * width
+        elif n <= 4:
+            markersize = 2 * width
+        else: markersize = 0.1*width
     
-        elif type(membership[0]) == np.int64 or type(membership[0] == np.float64):    # if one circle fitted per z-ring
-            for i in range(len(NPCs_ellipse)):
-                el = plotEllipse(NPCs_ellipse[i])
-                alpha = [float(i) for i in ColourcodeZ(el[:,2])]
-                ax.scatter(el[:,0], el[:, 1], lw = 1, c = "g", alpha = alpha)
-
-    if circle: 
-        NPCs_circle = Analyse_deformed.Circles(NPCoffset, membership = membership)
+        # prepare to colourcode z position
+        zs = NPCoffset[:,2]
+        nup_i = NPCoffset[:,3].astype(int)
         
-        if type(membership[0]) == np.str_:     # if one circle fitted per NPC subcomplexD
-
-            for i in range(n): 
-                for key in NPCs_circle:
-                    circ = plotCircle(NPCs_circle[key][i])
-                    alpha = [float(i) for i in ColourcodeZ(circ[:,2])]
-                    ax.scatter(circ[:,0], circ[:, 1], lw = 2, c = "b", alpha = alpha)
+        zcolour = []    
+        zcolour.extend(ColourcodeZ(list(zs)))  
+    
+    
+        # plot
+        fig, ax = plt.subplots(1, 1, figsize = (width, width))
+        ax.set_title("mag " + str(mag))
+    
+        nupmarker = nupMarker()
+        nupcolor = nupColor()
+    
+        dim2 = 2 if self.view == "side" else 1 # 1 is y-coordinates, 2 is z-coordinates
+        for i in np.unique(nup_i):
+            x = NPCoffset[nup_i==i][:, 0]
+            y = NPCoffset[nup_i==i][:, dim2]
+            zcolour_subset = [zcolour[j] for j in range(len(zcolour)) if nup_i[j] == i ]
+            ax.scatter(x, y, c = zcolour_subset, s = 40*markersize, edgecolors = nupcolor[i], marker = nupmarker[i])
+    
+    
+        # # TODO: delete. this is just here because ax.y_lim doesn't work. 
+        # ax.scatter(-70, 0, c = "white", s = 0)
+        # ax.scatter(70, 0, c = "white", s = 0)
+        # ax.scatter(0, 70, c = "white", s = 0)
+        # ax.scatter(0, -70, c = "white", s = 0)
+    
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        
+        # if anchor == True:
+        #     Ancoffset = OffsetNPCs(anchors, NPCs, maxr)
+            
+        #     ax.scatter(Ancoffset[:,0], Ancoffset[:,1], c = "orange", s = 40*markersize)
+           
+        #     for i in range(len(Ancoffset)):
+        #         ax.plot([Ancoffset[i][0], NPCoffset[i][0]], [Ancoffset[i][1], NPCoffset[i][1]], linestyle = ":")
+            
+        if force == True: 
+            Forceoffset = OffsetNPCs(forces, maxr)
+            ax.scatter(Forceoffset[:,0], Forceoffset[:,1], c = "blue", s = 10*markersize)
+            
+        # fit circle and/or ellipse
+        if ellipse:
+            NPCs_ellipse = Analyse_deformed.Ellipses(NPCoffset, membership = membership)
+            if type(membership[0]) == np.str_: 
+                for i in range(n): 
+                    for key in NPCs_ellipse:
+                        el = plotEllipse(NPCs_ellipse[key][i])
+                        alpha = [float(i) for i in ColourcodeZ(el[:,2])]
+                        ax.scatter(el[:,0], el[:, 1], lw = 2, c = "g", alpha = alpha)
                     
-        elif type(membership[0]) == np.int64 or type(membership[0] == np.float64):    # if one circle fitted per z-ring
-            
-            for i in range(len(NPCs_circle)):
-                circ = plotCircle(NPCs_circle[i])
-
-                alpha = [float(i) for i in ColourcodeZ(circ[:,2])]
-                if math.isnan(alpha[0]): alpha = 0.7
-
-                ax.scatter(circ[:,0], circ[:, 1], lw = 1, c = "b", alpha = alpha)
-            
+        
+            elif type(membership[0]) == np.int64 or type(membership[0] == np.float64):    # if one circle fitted per z-ring
+                for i in range(len(NPCs_ellipse)):
+                    el = plotEllipse(NPCs_ellipse[i])
+                    alpha = [float(i) for i in ColourcodeZ(el[:,2])]
+                    ax.scatter(el[:,0], el[:, 1], lw = 1, c = "g", alpha = alpha)
     
-    # colourbar for z position 
-    mincolour = float(min(zcolour))
-    maxcolour = float(max(zcolour))
-
-    if mincolour!= maxcolour:
-        incr = (maxcolour - mincolour)/max(zs) # increment in colour 
-        cmap = (ListedColormap( [str(i) for i in list(np.arange(mincolour, maxcolour + 0.5*incr, incr))])) 
-        norm = plt.Normalize(min(zs), max(zs))
-        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), shrink = 0.7, label = "z [nm]", ticks = [min(zs), max(zs)])
-
-
-    ax.set_xticks([])
-    ax.set_yticks([])
-
-
-    barsize = 20
-    label = str(barsize) + " nm"
-    #label = ""
-    scalebar = AnchoredSizeBar(ax.transData, barsize, label,  
-                               'lower center', size_vertical=5, 
-                              bbox_to_anchor = (1050, 70), frameon=False,
-                              color = [0.3,0.3,0.3])
-    ax.add_artist(scalebar)
- 
-
-
-    ax.axis("scaled") 
-    fig.tight_layout()
+        if circle: 
+            NPCs_circle = Analyse_deformed.Circles(NPCoffset, membership = membership)
+            
+            if type(membership[0]) == np.str_:     # if one circle fitted per NPC subcomplexD
+    
+                for i in range(n): 
+                    for key in NPCs_circle:
+                        circ = plotCircle(NPCs_circle[key][i])
+                        alpha = [float(i) for i in ColourcodeZ(circ[:,2])]
+                        ax.scatter(circ[:,0], circ[:, 1], lw = 2, c = "b", alpha = alpha)
+                        
+            elif type(membership[0]) == np.int64 or type(membership[0] == np.float64):    # if one circle fitted per z-ring
+                
+                for i in range(len(NPCs_circle)):
+                    circ = plotCircle(NPCs_circle[i])
+    
+                    alpha = [float(i) for i in ColourcodeZ(circ[:,2])]
+                    if math.isnan(alpha[0]): alpha = 0.7
+    
+                    ax.scatter(circ[:,0], circ[:, 1], lw = 1, c = "b", alpha = alpha)
+                
+        
+        # colourbar for z position 
+        mincolour = float(min(zcolour))
+        maxcolour = float(max(zcolour))
+    
+        if mincolour!= maxcolour:
+            incr = (maxcolour - mincolour)/max(zs) # increment in colour 
+            cmap = (ListedColormap( [str(i) for i in list(np.arange(mincolour, maxcolour + 0.5*incr, incr))])) 
+            norm = plt.Normalize(min(zs), max(zs))
+            fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), shrink = 0.7, label = "z [nm]", ticks = [min(zs), max(zs)])
+    
+    
+        ax.set_xticks([])
+        ax.set_yticks([])
+    
+    
+        barsize = 20
+        label = str(barsize) + " nm"
+        #label = ""
+        scalebar = AnchoredSizeBar(ax.transData, barsize, label,  
+                                   'lower right', size_vertical=5, 
+                                  #bbox_to_anchor = (1050, 70), frameon=False,
+                                  #bbox_to_anchor = (1050, 70), 
+                                  frameon=False,
+                                  color = [0.3,0.3,0.3])
+        ax.add_artist(scalebar)
+     
+    
+    
+        ax.axis("scaled") 
+        fig.tight_layout()
 
 
 def plotEllipse(NPC):
@@ -243,38 +245,38 @@ def shifttilt_all_t(pos3D, nFrames, centre, tilt):
 
 
     
-def plotDetail(NPCscoords, NPCs, var, NPCi, width = 4, mode = "3D"):
+def plotDetail(NPCscoords, NPCs, var, index = 0, width = 4, mode = "3D"):
     """
     Input: 
         - NPCscoords: Coordinates of all NPCs 
         - NPCs: Dictionary containing info of all NPCs 
         - var: simulation variables 
-        - NPCi: Index of NPC for which the plot should be generated
+        - index: Index of NPC for which the plot should be generated
         - mode: "3D" or "2D", default: 3D: 2D or 3D plot
     """
     
     NoneOrTilt = lambda a, i: a[i] if type(a) is not type(None) else None
 
-    plotNPC = NPCscoords[NPCscoords[:,4] == NPCi]
+    plotNPC = NPCscoords[NPCscoords[:,4] == index]
     tiltnucv, tiltcytv = DeformNPC.tiltvectors(var["kappa"], var["n"], var["seed"])
     shiftNuc, shiftCyt = DeformNPC.shiftvectors(var["shiftsigma"], var["n"], var["seed"])
-    tiltnucv_i = NoneOrTilt(tiltnucv, NPCi)#tiltnucv[NPCi] if type(tiltnucv) is not type(None) else None
-    tiltcytv_i = NoneOrTilt(tiltcytv, NPCi)
+    tiltnucv_i = NoneOrTilt(tiltnucv, index)#tiltnucv[NPCi] if type(tiltnucv) is not type(None) else None
+    tiltcytv_i = NoneOrTilt(tiltcytv, index)
 
     if mode == "2D":     
-        Plot2D(plotNPC, NPCs["NPCs"][NPCi], NPCs["zexp"], NPCs["nupIndex"][NPCi], var["symmet"], var["nConnect"], 
-                                                 tiltnucv_i, tiltcytv_i, shiftNuc[NPCi], shiftCyt[NPCi],
-                                                 forces = NPCs["fcoords"][NPCi], showforce = False, 
+        Plot2D(plotNPC, NPCs["NPCs"][index], NPCs["zexp"], NPCs["nupIndex"][index], var["symmet"], var["nConnect"], 
+                                                 tiltnucv_i, tiltcytv_i, shiftNuc[index], shiftCyt[index],
+                                                 forces = NPCs["fcoords"][index], showforce = False, 
                                                  legend = False, trajectory = True, 
                                                  colourcode=True, springs = False, anchorsprings = False, width = width)
     
     elif mode == "3D":
-        membership = NPCs["ringmemall"][NPCscoords[:,4] == NPCi]
-        tiltnucv_i = NoneOrTilt(tiltnucv, NPCi)#tiltnucv[NPCi] if type(tiltnucv) is not type(None) else None
-        tiltcytv_i = NoneOrTilt(tiltcytv, NPCi)
-        Plot3D(plotNPC, NPCs["NPCs"][NPCi], NPCs["nupIndex"][NPCi], var["nup"], var["term"], NPCs["isnuc"], var["symmet"], 
-                            tiltnucv_i, tiltcytv_i, shiftNuc[NPCi], shiftCyt[NPCi],
-                            NPCs["fmags"][NPCi], NPCs["fcoords"][NPCi], membership, plotforces = False, viewFrame = -1, width = width)
+        membership = NPCs["ringmemall"][NPCscoords[:,4] == index]
+        tiltnucv_i = NoneOrTilt(tiltnucv, index)#tiltnucv[NPCi] if type(tiltnucv) is not type(None) else None
+        tiltcytv_i = NoneOrTilt(tiltcytv, index)
+        Plot3D(plotNPC, NPCs["NPCs"][index], NPCs["nupIndex"][index], var["nup"], var["term"], NPCs["isnuc"], var["symmet"], 
+                            tiltnucv_i, tiltcytv_i, shiftNuc[index], shiftCyt[index],
+                            NPCs["fmags"][index], NPCs["fcoords"][index], membership, plotforces = False, viewFrame = -1, width = width)
         
     
 
@@ -393,15 +395,15 @@ def Plot2D(plotNPC, solution, z, nup_i, symmet, nConnect, tiltnucv, tiltcytv, sh
     plt.tight_layout()
 
 
-def positionVStime(NPCs, i, width = 3, legend = False):
+def positionVStime(NPCs, index = 0, width = 3, legend = False):
     """
     NPCs: Dictionary containing info of all NPCs 
-    i: Index of NPC for which plot should be generated 
+    index: Index of NPC for which plot should be generated 
     width: Width of each subplot 
     legend: Show ledged. Default False 
     """
-    symmet = len(NPCs["fmags"][i][0]) # length of array of deforming forces on NPC i ring 0. Should be equivalent to symmetry
-    XYoverTime(NPCs["NPCs"][i], symmet = symmet, width = width, legend = legend)
+    symmet = len(NPCs["fmags"][index][0]) # length of array of deforming forces on NPC i ring 0. Should be equivalent to symmetry
+    XYoverTime(NPCs["NPCs"][index], symmet = symmet, width = width, legend = legend)
     
 
 def XYoverTime(solution, symmet, width = 5, legend = False): #TODO: remove nRings
@@ -600,22 +602,23 @@ def Plot3D(plotNPC, solution, nup_i, nupname, termname, isnuc, symmet, tiltnucv,
 
 #%matplotlib qt
     
-def AnimateDetail(NPCs, var, NPCi, width = 8, name = None):
+def AnimateDetail(NPCs, var, index = 0, width = 8, directory = "", name = None, ext = ".gif"):
     """
     Input: 
         - NPCs 
         - var
-        - NPCi
+        - index
         - name: None or string. Output will be saved if name is string. Default None
+        - ext: ".gif" or ".mp4", default ".gif"
     """
-    AnimatedScatter(NPCs["NPCs"][NPCi], 
+    AnimatedScatter(NPCs["NPCs"][index], 
                                        var["nConnect"], var["symmet"], 
-                                                          NPCs["rexp"], NPCs["fmags"][NPCi], 
-                                                          NPCs["zexp"], NPCs["nupIndex"][NPCi], width, name)
+                                                          NPCs["rexp"], NPCs["fmags"][index], 
+                                                          NPCs["zexp"], NPCs["nupIndex"][index], width, directory, name, ext)
         
 class AnimatedScatter(object):
     """An animated scatter plot using matplotlib.animations.FuncAnimation."""
-    def __init__(self, solution, nConnect, symmet, r, fmags, z, nup_i, width, name):
+    def __init__(self, solution, nConnect, symmet, r, fmags, z, nup_i, width, directory, name, ext):
         self.solution = solution
         self.nRings = len(solution)
         self.anchors = np.zeros(3)#anchors
@@ -649,7 +652,7 @@ class AnimatedScatter(object):
         if name: 
             self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/nframes), 
                                               init_func=self.setup_plot, blit=True, save_count=len(solution[0].t))
-            self.ani.save(name + ".gif", fps = 50)
+            self.ani.save(directory + name + ext, fps = 50, dpi = 80)
        
         else: 
             self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/nframes), 
@@ -745,15 +748,15 @@ if __name__ == '__main__':
     
  
 
-def AnimateOverview(NPCs, OffsetNPCs, var, width = 8, name = None):
+def AnimateOverview(NPCs, OffsetNPCs, var, width = 8, directory = "", name = None, ext = ".gif"):
 
-    AnimateAll(NPCs["NPCs"], OffsetNPCs, NPCs["fcoords"], var["symmet"], NPCs["rexp"], width, name)
+    AnimateAll(NPCs["NPCs"], OffsetNPCs, NPCs["fcoords"], var["symmet"], NPCs["rexp"], width, directory, name, ext)
  
  
     
 class AnimateAll(object):
     """An animated scatter plot using matplotlib.animations.FuncAnimation."""
-    def __init__(self, NPCs, OffsetNPCs, forcecoords, symmet, r, width, name ):
+    def __init__(self, NPCs, OffsetNPCs, forcecoords, symmet, r, width, directory, name, ext):
           
         self.n = len(NPCs)
         self.tmax = len(NPCs[0][0].t)
@@ -810,7 +813,7 @@ class AnimateAll(object):
                                           init_func=self.setup_plot, blit=True, save_count=self.tmax)
         
         #if name: self.ani.save(name + ".mp4", dpi = 250, fps = 30)
-        if name: self.ani.save(name + ".gif", dpi = 150, fps = 30)
+        if name: self.ani.save(directory + name + ext, dpi = 80, fps = 30)
 
         plt.show()
 
@@ -907,83 +910,105 @@ class AnimateAll(object):
         plt.show()
         
         
-def featureHist(features1):
-    rows = 3
-    cols = 2
-    name = ["radius [nm]", "minor/major ellip.", "RSS ellip. [nm]", "tilt-dif. ellip. [rad]", "shift ellip. [nm]", "dist ellip [nm]"]
-  
-    plt.rcParams.update({'font.size': 50})
-
-    fig, ax = plt.subplots(rows, cols, figsize = (cols*10, rows*8), sharey = False)
-   # bins = int(len(features1[0])/10) #50
-    
-    data = features1[0]
-
-    if (data.max() - data.min()):
-        # determine number of bins via Freedman-Diaconis 
-    
-        iqr = np.subtract(*np.percentile(data, [75, 25]))
-        binwidth = 2 * iqr * (len(data) ** (-1 / 3))
-        bins = int((data.max() - data.min()) / binwidth)
-        #print(bins)
-    else:
-        bins = 20
-    
-
-    kwargs = dict(histtype='stepfilled', alpha=0.5,  bins= bins, ec="k", linewidth=4)
-
-    for i in range(rows):
-        for j in range(cols):
-            k = int(i*2 + j*1)
-            
-            if k == 0: # set label only for first plot
-                label1 = "$D_{mag}$: 1, $r_\sigma$: 2"  
-            else:
-                label1 =  None
-
-                
-            ax[i,j].hist(features1[k], color = "teal", label = label1, **kwargs)
-
-            
-            #ax[i,j].set_ylim([0, 200])
-            #ax[i,j].set_yticks([0, 100])
-            ax[i,j].set_xlabel(name[k])
-
-
-
-    ax[1,0].set_ylabel("n NPCs")
-            
-
-    
-    def pdffeats(features, i,j, color, label =None, linestyle = "-"):
-        # i and j are ax indices 
-        mu, std = norm.fit(features) 
-
-        #find area under curve 
-        values, bns, _ = ax[i,j].hist(features, bins = bins, alpha = 0, linewidth = 0)
-        area = sum(np.diff(bns)*values)
+class gethistdata:        
+    def __init__(self, var, NPCs, featuresAll, featuresElAll, featuresel3DAll, width = 5, bins = None):
         
-        xmin, xmax = min(bns), max(bns)
-        x = np.linspace(xmin, xmax, 100)
-        p = norm.pdf(x, mu, std)*area#(xmax-xmin)/bins
-        #label = None
-        ax[i, j].plot(x, p, color, linewidth=5, linestyle = linestyle, label = label)  
+        self.width = width
+        self.bins = bins
+        # featuresAll, _, _ = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)
+        # featuresElAll, _, _ = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
+        # _, _, _, _, featuresel3DAll = exportCSV.col_features(NPCs, circle_CRNR, ellipse_CRNR)
     
+        
+        
+        self.rc1 = featuresAll[:, 0]  # circle radius
+        self.qe1 = featuresElAll[:, 2]   # minor/major axis ratio
+        self.RSSe1 = featuresElAll[:, 4] # RSS 3D
+        self.tilte1 = Analyse_deformed.angles(featuresel3DAll[:,6:]) # tilt angles
+        self.shifte1, self.diste1 = Analyse_deformed.findshiftEl(featuresel3DAll)
+        self.featureHist([self.rc1, self.qe1, self.RSSe1, self.tilte1, self.shifte1, self.diste1])
+        
+     #   return [rc1, qe1, RSSe1, tilte1, shifte1, diste1]
     
-    color1 = "darkcyan"
-    pdffeats(features1[0], 0, 0, color1)
-    pdffeats(features1[1], 0, 1, color1)
-    pdffeats(features1[5], 2, 1, color1)
-
-    
-    
-    fig.legend(loc = "upper right")
-    #fig.legend.get_frame().set_facecolor((0, 0, 1, 0.1))
-      #handles, labels = ax.get_legend_handles_labels()
-      #fig.legend(handles, labels, loc='upper center')
-
-    plt.tight_layout()
             
+    def featureHist(self, features1):
+        rows = 3
+        cols = 2
+        name = ["radius [nm]", "minor/major ellip.", "RSS ellip. [nm]", "tilt-dif. ellip. [rad]", "shift ellip. [nm]", "dist ellip [nm]"]
+      
+        plt.rcParams.update({'font.size': self.width*2})
+    
+        fig, ax = plt.subplots(rows, cols, figsize = (self.width*0.8, self.width), sharey = False)
+       # bins = int(len(features1[0])/10) #50
+        
+        data = features1[0]
+    
+        if self.bins: bins = self.bins
+        elif (data.max() - data.min()):
+            # determine number of bins via Freedman-Diaconis 
+        
+            iqr = np.subtract(*np.percentile(data, [75, 25]))
+            binwidth = 2 * iqr * (len(data) ** (-1 / 3))
+            bins = int((data.max() - data.min()) / binwidth)
+            #print(bins)
+        else:
+            bins = 20
+        
+    
+        kwargs = dict(histtype='stepfilled', alpha=0.5,  bins= bins, ec="k", linewidth=4)
+    
+        for i in range(rows):
+            for j in range(cols):
+                k = int(i*2 + j*1)
+                
+                if k == 0: # set label only for first plot
+                    label1 = "$D_{mag}$: 1, $r_\sigma$: 2"  
+                else:
+                    label1 =  None
+    
+                    
+                ax[i,j].hist(features1[k], color = "teal", label = label1, **kwargs)
+    
+                
+                #ax[i,j].set_ylim([0, 200])
+                #ax[i,j].set_yticks([0, 100])
+                ax[i,j].set_xlabel(name[k])
+    
+    
+    
+        ax[1,0].set_ylabel("n NPCs")
+                
+
+        
+        def pdffeats(features, i,j, color, label =None, linestyle = "-"):
+            # i and j are ax indices 
+            mu, std = norm.fit(features) 
+    
+            #find area under curve 
+            values, bns, _ = ax[i,j].hist(features, bins = bins, alpha = 0, linewidth = 0)
+            area = sum(np.diff(bns)*values)
+            
+            xmin, xmax = min(bns), max(bns)
+            x = np.linspace(xmin, xmax, 100)
+            p = norm.pdf(x, mu, std)*area#(xmax-xmin)/bins
+            #label = None
+            ax[i, j].plot(x, p, color, linewidth=5, linestyle = linestyle, label = label)  
+        
+        
+        color1 = "darkcyan"
+        pdffeats(features1[0], 0, 0, color1)
+        pdffeats(features1[1], 0, 1, color1)
+        pdffeats(features1[5], 2, 1, color1)
+    
+        
+        
+        fig.legend(loc = "upper right")
+        #fig.legend.get_frame().set_facecolor((0, 0, 1, 0.1))
+          #handles, labels = ax.get_legend_handles_labels()
+          #fig.legend(handles, labels, loc='upper center')
+    
+        plt.tight_layout()
+                
 
     # Plot between -30 and 30 with
 # 0.1 steps.

@@ -415,8 +415,6 @@ def MultipleNPC(nup, term, model, n = 1, relative = False, rvar = None, thetavar
     thetaold = selectedNup.rotAng # NR - CR
     thetaoffset = selectedNup.rotOffset #0, -45 or +45. Only works for 8-fold symmetry
     
-
-   
     
     rold = np.array(r)
     zold = np.array(z)

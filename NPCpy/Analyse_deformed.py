@@ -456,23 +456,26 @@ def fitCircle(NPC):
 
 
 
-def meanfeaturesC(circle_allrings, z_i_ring):  
+def meanfeaturesC(NPCs, var, circle_allrings):  
     """return FeaturesAll, centreAll, tiltAll"""
+    z_i_ring = np.repeat([i for i in range(var["n"])], len(NPCs["zexp"])) # index that assigns each ring to an NPC
     n = len(np.unique(z_i_ring)) # n NPCs  
     featuresAll = np.zeros((n, 4)) # 4 because radius, SSE, SSE lateral, SSE axial
     centreAll = np.zeros((n, 3)) # 3 because 3D
     tiltAll = np.zeros((n, 3)) # 3 because 3D
     
     for i in range(n):               
-        circle_NPC_n = list(compress(circle_allrings, z_i_ring == i))
-        range_n_rings_in_i = range(len(circle_NPC_n))
-        featuresAll[i] = np.array([np.mean([circle_NPC_n[j][k] for j in range_n_rings_in_i]) for k in range(4)])
-        centreAll[i] = np.mean([circle_NPC_n[j][4] for j in range_n_rings_in_i], axis = 0)
-        tiltAll[i] =  np.mean([circle_NPC_n[j][5] for j in range_n_rings_in_i], axis = 0)
+        circle_NPC_n = list(compress(circle_allrings, z_i_ring == i)) # circle_allrings, but only values for NPC with index i 
+        range_n_rings_in_i = range(len(circle_NPC_n)) # range of numbers of rings within NPC i
+        featuresAll[i] = np.array([np.mean([circle_NPC_n[j][k] for j in range_n_rings_in_i]) for k in range(4)]) # r, sqsum, residual, zsqsum
+        centreAll[i] = np.mean([circle_NPC_n[j][4] for j in range_n_rings_in_i], axis = 0) # centre per NPC
+        tiltAll[i] =  np.mean([circle_NPC_n[j][5] for j in range_n_rings_in_i], axis = 0) # tilt per NPC 
     return featuresAll, centreAll, tiltAll
 
 
-def meanfeaturesE(ellipse_allrings, z_i_ring, el_name=False):
+def meanfeaturesE(NPCs, var, ellipse_allrings, el_name=False):
+    z_i_ring = np.repeat([i for i in range(var["n"])], len(NPCs["zexp"]))
+
     if el_name == False:
         el_name = ["el_major", "el_minor", "el_q", "el_rot", "el_ssum", "el_ssumXY", "el_ssumZ"]
     n = len(np.unique(z_i_ring)) # n NPCs  
