@@ -3,7 +3,7 @@
 
 ### Intallation 
 
-`pip intall git+https://github.com/MariaTheiss/NPCpy.git`
+`pip intall git+https://github.com/MariaTheiss/NPCpy.git`  
 `pip install -e` 
 
 
