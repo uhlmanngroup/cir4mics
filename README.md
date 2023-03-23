@@ -3,8 +3,8 @@
 
 ### Intallation 
 
-`pip intall git+https://github.com/MariaTheiss/NPCpy.git`  
-`pip install -e` 
+`pip install git+https://github.com/MariaTheiss/NPCpy.git`  
+`pip install -e .` 
 
 
 ### Run tutorial 
@@ -15,7 +15,7 @@
 ### Run minimal script 
 
 - Start an IDE of your choice 
-- Load NPCpy/call_functions.py
+- Load NPCpy/NPCpy/call_functions.py
 
 
 
