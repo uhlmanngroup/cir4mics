@@ -2,13 +2,20 @@
 
 
 ### Intallation 
+`git clone https://github.com/MariaTheiss/NPCpy.git`  
+`cd NPCpy`  
 
-`pip install git+https://github.com/MariaTheiss/NPCpy.git`  
-`pip install -e .` 
+### Install poetry 
+`pip install poetry`
+
+### Open a poetry shell
+`poetry shell`
+
+### Install dependencies 
+`poetry install` 
 
 
 ### Run tutorial 
-
 `jupyter-lab NPCpy/NPC_testlab.ipynb`
 
 
