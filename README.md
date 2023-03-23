@@ -3,13 +3,13 @@
 
 ### Intallation 
 
-pip intall git+https://github.com/MariaTheiss/NPCpy.git
-pip install -e 
+`pip intall git+https://github.com/MariaTheiss/NPCpy.git`
+`pip install -e` 
 
 
 ### Run tutorial 
 
-jupyter-lab NPCpy/NPC_testlab.ipynb 
+`jupyter-lab NPCpy/NPC_testlab.ipynb`
 
 
 ### Run minimal script 
