@@ -60,14 +60,16 @@ def OffsetNPCs(NPCcoords, maxr):
 
 class plotOverview:
     def __init__(self, OffsetNPCs, NPCs, var, width = 10, membership = 0, anchor = True,  
-                     force = False, ellipse = False, circle = False, view = "front"):
+                     force = False, ellipse = False, circle = False, view = "front", markersizemult = 10):
         """OffsetNPCs,
         NPCs, 
         var
         """
         self.view = view 
+        self.markersizemult = markersizemult
         fcoords = NPCs["fcoords"]
         forcecoords = DeformNPC.Multiple_coord(fcoords, var["symmet"]) 
+    
     
         self.OverviewPlot(OffsetNPCs, forcecoords, var["mag"], [0], membership, width, 
                                                    anchor = True,  force = False,
@@ -80,7 +82,7 @@ class plotOverview:
         n = int(NPCoffset[-1, 4] + 1) # number of NPCs
         
         if n == 1: 
-            markersize = 10 * width
+            markersize = self.markersizemult * width
         elif n <= 4:
             markersize = 2 * width
         else: markersize = 0.1*width
@@ -776,8 +778,8 @@ class AnimateAll(object):
         self.ncols = math.ceil(np.sqrt(self.n)) 
         self.nrows = math.ceil(self.n/self.ncols)
         
-        self.nrows = max(primefactors(self.n))
-        self.ncols = int(self.n/max(primefactors(self.n)))#math.ceil(self.n/self.ncols)
+        self.nrows = 1 if self.n == 1 else max(primefactors(self.n))
+        self.ncols = 1 if self.n == 1 else int(self.n/max(primefactors(self.n)))#math.ceil(self.n/self.ncols)
         
         
         # i = 0 # will get updated
