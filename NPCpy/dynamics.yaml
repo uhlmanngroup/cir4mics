@@ -2,6 +2,16 @@
 # This nup can thus be compared to equivalent single-channel simulations
 rel: No 
 
+n: 1 # Number of NPCs to be simulated by Default 
+
+# Select Model to be simulated 
+nup: ("",)
+term: ("", )
+model: "simple"
+
+# Reproducibility 
+seed: null # Generate new NPCs every run unless a seed is specified 
+
 # Geometric variability. Mean taken from input-model if null
 rvar: 
     rnew: null # new mean radius
@@ -34,9 +44,10 @@ sigmamult: 0.2 # Correlation of forces and offsets by distance
 
 # Spring paramters
 nConnect: 2 # number of neighbours connected cw or acw
-damp: 1 # Damping of longest circumferential spring 
-kr: 0.7 # Damping of shortest circumferential spring
+damp: 1 # Damping 
+kr: 0.7 # Spring constant of shortest circumferential spring
+kmult: 1 # Multiplier for spring constants of circumferential springs 
 
-# dynamics
+# Dynamics
 tlast: 200 # last timepoint for simulation. 
 step: 1 # timesteps for animation

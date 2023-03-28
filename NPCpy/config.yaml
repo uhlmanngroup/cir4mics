@@ -2,6 +2,11 @@
 # This nup can thus be compared to equivalent single-channel simulations
 rel: No 
 
+n: 1 # Number of NPCs to be simulated by default 
+
+# Reproducibility 
+seed: null # Different NPCs will be generated with every run, unless a seed is specified 
+
 # Geometric variability. Mean taken from input-model if null
 rvar: 
     rnew: null # new mean radius
@@ -26,6 +31,7 @@ elliptvar:
     elliptnew: null # New elongation. Correlates with elongation on final NPC
     elliptsigma: null # Deviation of elongation
 
+
 # Controls Forces/offsets
 # Irregular variability    
 mag: 0 # forces in xy
@@ -34,9 +40,10 @@ sigmamult: 0.5 # Correlation of forces and offsets by distance
 
 # Spring paramters
 nConnect: 2 # number of neighbours connected cw or acw
-damp: 1 # Damping of longest circumferential spring 
-kr: 0.7 # Damping of shortest circumferential spring
+damp: 1 # Damping of springs
+kr: 0.7 # Spring constant of anchor springs 
+kmult: 1 # Multiplier for circumferential spring constants 
 
-# dynamics
+# Dynamics
 tlast: 20 # last timepoint for simulation. 
 step: 0.25 # timesteps for animation
