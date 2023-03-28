@@ -813,6 +813,8 @@ class AnimateAll(object):
         self.ani = animation.FuncAnimation(self.fig, self.update, interval=(5000/self.tmax),
                                           init_func=self.setup_plot, blit=True, save_count=self.tmax)
         
+       
+        
         #if name: self.ani.save(name + ".mp4", dpi = 250, fps = 30)
         if name: self.ani.save(directory + name + ext, dpi = 80, fps = 30)
         if ext == "HTML": 
@@ -906,11 +908,7 @@ class AnimateAll(object):
     def colourcodeZ(self, z, darkest = 0.0, brightest = 1):
         '''colourcode z, smaller values are shown darker, returns array'''
         return np.interp(z, (min(z), max(z)), (darkest, brightest))
-    
-    if __name__ == '__main__':
-        a = AnimateAll(NPCs, symmet, r)
-    
-        #plt.show()
+
         
         
 class gethistdata:        
