@@ -52,6 +52,19 @@ class SelectNup:
         #MODEL 5A9Q
         #Nup43 N getcr #1.1/0,R,9,I:4@CA
         
+        if model == "SMILE":
+            if nup == "NOTANUP":
+                if term == "NOTATERM":
+                    lefteye = np.array([3250, 2500, 0]) 
+                    righteye = np.array([4750, 2500, 0]) 
+                    nose1 = np.array([4000, 1750, 0]) 
+                    tooth1 = np.array([3000, 1500, 0]) 
+                    tooth2 = np.array([3500, 1150, 0]) 
+                    tooth3 = np.array([4000, 1000, 0]) 
+                    tooth4 = np.array([4500, 1150, 0]) 
+                    tooth5 = np.array([5000, 1500, 0]) 
+                    ref = np.array([lefteye, righteye, nose1, tooth1, tooth2, tooth3, tooth4, tooth5])
+                    
         if (model == "SIMPLE"): # Simple model for implementation purposes
             if (type(nup) == str):
                 if (type(term) == str):
@@ -60,14 +73,14 @@ class SelectNup:
                     ref = np.array([auth])
 
         if (model == "OTHER"): # Simple model for implementation purposes
-            if (type(nup) == str):
-                if (type(term) == str):
-                    auth1 = np.array([0, 500, 0])
-                    auth2 = np.array([50, 600, 0])
-                    auth3 = np.array([80, 450, 0])
-                    auth4 = np.array([140, 550, 0])
-                    auth5 = np.array([190, 400, 0])
-                    auth6 = np.array([185, 950, 0])
+            if (type(nup) == tuple):
+                if (type(term) == tuple):
+                    auth1 = np.array([1., 500., 1.])
+                    auth2 = np.array([50., 600., 1.])
+                    auth3 = np.array([80., 450., 1.])
+                    auth4 = np.array([140., 550., 1.])
+                    auth5 = np.array([190., 400., 1.])
+                    auth6 = np.array([185., 950., 1.])
                     ref = np.array([auth1, auth2, auth3, auth4, auth5, auth6])
             
             
@@ -1482,7 +1495,7 @@ class SelectNup:
         if model == "SIMPLE":  
             c = np.array([711.36, 711.36]) # central axis 
             
-        if model == "OTHER": 
+        if model == "OTHER" or model == "SMILE": 
             c = np.array([0, 0])
             
         if model == "7PEQ" or model == "7PER": 
@@ -1506,7 +1519,7 @@ class SelectNup:
             else:
                 return ["BRCR" if ref[i,2] > np.mean(ref[:,2]) else "BRNR" for i in range(len(ref))]
             
-        if model == "SIMPLE" or model == "OTHER":
+        if model == "SIMPLE" or model == "OTHER" or model == "SMILE":
             return ["IR" for i in range(len(ref))]
             
         if model == "7PER" or model == "5IJN" or model == "5IJO":
@@ -1607,6 +1620,7 @@ class SelectNup:
     def rotang(self, z, ringAng):
         "Find azimuthal angle between nearest 'corners' of two rings"
         midplane = np.mean(z) 
+
         octOffset = 2*np.pi/8 # TODO: different sym?
 
         crAng = np.mean(ringAng[z > midplane]) 
