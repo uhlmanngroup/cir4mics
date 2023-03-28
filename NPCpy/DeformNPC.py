@@ -17,6 +17,8 @@ import sys
 from Nups_Info import SelectNup
 from numba import njit
 import Analyse_deformed
+import math 
+np.seterr(divide='ignore', invalid='ignore') # To stop printing "RuntimeWarning: invalid value encountered in divide"
 
 # import line_profiler
 # profile = line_profiler.LineProfiler()
@@ -25,7 +27,7 @@ import Analyse_deformed
 class DeformNPC:
     def __init__(self, r, ringAngles, z, symmet = 8, elliptical = False, 
                  mag = 0, zmag = 0, sigmamult = 0.5, nConnect = 2, damp = 1, 
-                 kr = 0.7, tlast = 20, step = 0.25, seed = None):
+                 kr = 0.7, tlast = 20, step = 0.25, kmult = 1, seed = None):
         '''
         Models deformed NPCs using solve_ivp based on a simple, rotationally symmetric node and spring model with deforming forces applied in xy direcion. 
         ### Input ###
@@ -94,7 +96,7 @@ class DeformNPC:
             self.initcoords.append(initcoord) 
             Lrest = self.springlengths(initcoord)
             Lrests.append(Lrest) 
-            Ks.append(self.springconstants(Lrest))
+            Ks.append(self.springconstants(Lrest, kmult = kmult))
             y0s.append(np.concatenate((initcoord.flatten(), np.zeros(3 * self.symmet))))        
             
         self.r = r_corrected    
@@ -244,13 +246,14 @@ class DeformNPC:
         return circulant(l)
 
     
-    def springconstants(self, Lrest):
+    def springconstants(self, Lrest, kmult = 1):
         "Returns circulant matrix of spring constants "
         
         Lscale = Lrest/Lrest[0][1] # scaled so that shortest edge is 1
         
         k = np.ones(int(np.floor(self.symmet/2)))
-        
+        k *= kmult
+
         if(self.symmet%2 == 0): #if symmet is even
             k[-1] = k[-1]/2 # springs that connect opposite corners will be double-counted. Spring constant thus halved 
             K = circulant(np.append(0, np.append(k, np.flip(k[:-1]))))
@@ -358,9 +361,9 @@ class DeformNPC:
 # Multiple NPCs 
 
 #DeformNPC()
-def MultipleNPC(nup, term, model, n = 1, relative = False, rvar = None, thetavar = None, 
+def MultipleNPC(nup, term, model, n = 1, rel = False, rvar = None, thetavar = None, 
                 dvar = None, symmet = 8, elliptvar = None, mag = 0, zmag = 0, 
-                sigmamult = 0.5, nConnect = 2, damp = 1, kr = 0.7, tlast = 20, step = 0.25, seed = None):
+                sigmamult = 0.5, nConnect = 2, damp = 1, kr = 0.7, tlast = 20, step = 0.25, seed = None, kmult = 1, **kwargs):
     """
     Simulate n deformed NPCs using solve_ivp based on a simple, rotationally symmetric node and spring model 
     with deforming forces applied in xy direcion and axial offset zmag. 
@@ -415,7 +418,6 @@ def MultipleNPC(nup, term, model, n = 1, relative = False, rvar = None, thetavar
     thetaold = selectedNup.rotAng # NR - CR
     thetaoffset = selectedNup.rotOffset #0, -45 or +45. Only works for 8-fold symmetry
     
-    
     rold = np.array(r)
     zold = np.array(z)
     #NucSideBool should be all True for only one ring 
@@ -425,7 +427,7 @@ def MultipleNPC(nup, term, model, n = 1, relative = False, rvar = None, thetavar
     z_i_all = np.repeat(np.arange(n*nRings), symmet)
     
     
-    if relative: # define first listed Nup as reference for ringAngles, theta, radius, and distance
+    if rel: # define first listed Nup as reference for ringAngles, theta, radius, and distance
         refNup = SelectNup(nup[0], term[0], model)
         ringAngles -= np.mean(ringAngles[nup_i==0])
         thetaold = refNup.rotAng
@@ -460,7 +462,13 @@ def MultipleNPC(nup, term, model, n = 1, relative = False, rvar = None, thetavar
     # expected values: pretends no standard deviation is applied, to export as metadata  
     rexp = Change_radius(rold,  rvar["rnew"]) # rsigma, etc, False if not specified 
     zexp = Change_dist(zold, dvar["dnew"])
-    ringAnglesExp, _ = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetavar["thetanew"])
+    
+    
+    if math.isnan(thetaold): #thetaold will be nan if all nups lie on the same z-plane. 
+        ringAnglesExp = ringAnglesOld
+        newminTheta = None # updated twist angle. No twist angle if all nups lie on the same z-plane 
+    else: 
+        ringAnglesExp, _ = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetavar["thetanew"])
 
     # Modification 1 here 
     # dnew = 30
@@ -478,8 +486,9 @@ def MultipleNPC(nup, term, model, n = 1, relative = False, rvar = None, thetavar
         # update r, z, angles, and ellipticity 
         nup_is.append(nup_i)
         r = Change_radius(rold,  rvar["rnew"], rvar["rsigma"], seeds[i])
-        z = Change_dist(zold, dvar["dnew"], dvar["dsigma"], seeds[i])
-        ringAngles, newminTheta = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetavar["thetanew"], thetavar["thetasigma"], seeds[i])
+        if not math.isnan(thetaold): # If Nups lie on different z-planes 
+            z = Change_dist(zold, dvar["dnew"], dvar["dsigma"], seeds[i])
+            ringAngles, newminTheta = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetavar["thetanew"], thetavar["thetasigma"], seeds[i])
         elliptical = Change_ellipt(elliptvar["elliptnew"], elliptvar["elliptsigma"], seeds[i])
         
         #Modification 2 here  
@@ -505,7 +514,7 @@ def MultipleNPC(nup, term, model, n = 1, relative = False, rvar = None, thetavar
         
         deformNPC_temp = DeformNPC(r, ringAngles, z, symmet = symmet, elliptical = elliptical,
                                    mag = mag, zmag = zmag, sigmamult = sigmamult, nConnect = nConnect, 
-                                   damp = damp, kr = kr, tlast = tlast, step = step, seed = seeds[i])
+                                   damp = damp, kr = kr, tlast = tlast, step = step, kmult=kmult, seed = seeds[i])
         
 
 

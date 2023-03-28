@@ -20,13 +20,10 @@ def getNPCs(var):
     """Input: var (dictionary)
     Output: Dictionary containing simulated NPCs and their metadata
     """
-    if type(var["nup"]) == str: var["nup"] = tuple([var["nup"]])
-    if type(var["term"]) == str: var["term"] = tuple(["term"])
-
-
-    return DeformNPC.MultipleNPC(var["nup"], var["term"], var["model"], n = var["n"], relative = var["rel"], rvar=var["rvar"], 
-                                     thetavar = var["thetavar"], dvar = var["dvar"], symmet = var["symmet"], 
-                                     elliptvar = var["elliptvar"], mag = var["mag"], zmag = var["zmag"], seed = var["seed"])
+    return DeformNPC.MultipleNPC(**var)
+    # return DeformNPC.MultipleNPC(var["nup"], var["term"], var["model"], n = var["n"], rel = var["rel"], rvar=var["rvar"], 
+    #                                  thetavar = var["thetavar"], dvar = var["dvar"], symmet = var["symmet"], 
+    #                                  elliptvar = var["elliptvar"], mag = var["mag"], zmag = var["zmag"], seed = var["seed"])
     
 
 def getNPCcoords(NPCs, var):
