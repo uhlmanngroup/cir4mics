@@ -25,8 +25,7 @@ from sympy.ntheory import primefactors
 from scipy.stats import norm
 import copy 
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-import exportCSV
-
+from IPython.display import HTML
 
 Pos3D = DeformNPC.Pos3D
 Sol3D = DeformNPC.Sol3D
@@ -648,7 +647,7 @@ class AnimatedScatter(object):
         
         # Then setup FuncAnimation.
         
-        #HTML(self.ani.to_html5_video())
+        if ext == "HTML": HTML(self.ani.to_html5_video())
         
         #if name: self.ani.save(name + ".mp4", dpi = 250, fps = 50)
         if name: 
@@ -816,8 +815,10 @@ class AnimateAll(object):
         
         #if name: self.ani.save(name + ".mp4", dpi = 250, fps = 30)
         if name: self.ani.save(directory + name + ext, dpi = 80, fps = 30)
-
-        plt.show()
+        if ext == "HTML": 
+            HTML(self.ani.to_html5_video())
+        else:
+            plt.show()
 
 
     def xydata(self, NPCsCopy):        
@@ -907,9 +908,9 @@ class AnimateAll(object):
         return np.interp(z, (min(z), max(z)), (darkest, brightest))
     
     if __name__ == '__main__':
-        #a = AnimateAll(NPCs, symmet, r)
+        a = AnimateAll(NPCs, symmet, r)
     
-        plt.show()
+        #plt.show()
         
         
 class gethistdata:        
