@@ -20,7 +20,7 @@ var = NPC.getVars(config) # Transform config file into a python dictionary
 
 
 #### Adjust simulation parameters
-var["n"] = 1 # Number of NPCs to be simulated
+var["n"] = 2 # Number of NPCs to be simulated
 NPCi = 0 # index out of n of NPC to be shown in any detail-plot or animation. 0-indexed.  
 var["seed"] = 123 #seed for reproducibility. Any number but 0
 
@@ -28,7 +28,6 @@ var["seed"] = 123 #seed for reproducibility. Any number but 0
 var["nup"] = ("nup107",)
 var["term"] = ("C",)
 var["model"] = "5a9q"#"simple"
-var["model"] = "simple"
 #var["rel"] = True # remove the "#" before var["rel"] = True to select the first nup as reference 
 
 #### Variability parameters

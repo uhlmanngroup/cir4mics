@@ -1,6 +1,5 @@
-## Setup 
-Requirements: 
-- python, pip 
+## Requirements    
+- python, pip, git
 https://pip.pypa.io/en/stable/installation/ 
 
 ### Linux, macOS
@@ -11,7 +10,8 @@ Recommended Windows command line shells are Windows powershell or cmd.exe.
 Alternatively use Windows Subsystem for Linux (WSL). 
 
 
-### Intallation 
+## Intallation 
+Open a terminal of choice  
 Clone this repository:  
 Tip: Copy/paste commands to avoid typos 
 `git clone https://github.com/MariaTheiss/NPCpy.git`  
@@ -24,6 +24,9 @@ Change to the directory folder:
 
 or following: 
 https://python-poetry.org/docs/ 
+
+## Usage
+From the same directory as before 
 
 ### Open a poetry shell
 Create or start a virtual environment. Packages installed here will be isolated from the rest of the system, avoiding unfavourable crosstalk.  
@@ -73,8 +76,22 @@ See: https://www.sharepointdiary.com/2014/03/fix-for-powershell-script-cannot-be
 Windows: Issues with Microsoft C++ Build Tools (https://visualstudio.microsoft.com/visual-cpp-build-tools/):  
 Solution: Use at most version 3.10  
 
-Windows: Powershell, upon running `poetry shell` returns `Virtual environment already activated`. 
+Windows: Powershell upon running `poetry shell` returns `Virtual environment already activated`. 
 Solution: Restart the computer 
 See: https://visualstudio.microsoft.com/visual-cpp-build-tools/ 
 
 
+## Tutorials 
+### Simulating NPCs: 
+`jupyter-lab NPCpy/NPC_testlab.ipynb`
+
+### Including new models into the simulator 
+`jupyter-lab NPCpy/Include_models.ipynb`
+
+### Dynamics 
+Dynamics do not reflect true NPC dynamics, but might be useful if hard to predict dynamics are of interest 
+
+`jupyter-lab NPCpy/Dynamics.ipynb` 
+
+## Contact 
+theiss@ebi.ac.uk 
