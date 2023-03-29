@@ -13,7 +13,7 @@ import NPC_plotting
 import Analyse_deformed
 import numpy as np
 
-data_dir = '/home/maria/Documents/NPCPython/deletemedata2/' # Directory for output files
+data_dir = './data/' # Directory for output files
 
 config = 'config.yaml'
 var = NPC.getVars(config) # Transform config file into a python dictionary 
@@ -27,7 +27,7 @@ var["seed"] = 123 #seed for reproducibility. Any number but 0
 ## Select one or more nups, their terminus, and an NPC model for simulation 
 var["nup"] = ("nup107",)
 var["term"] = ("C",)
-var["model"] = "5a9q"#"simple"
+var["model"] = "5a9q" 
 #var["rel"] = True # remove the "#" before var["rel"] = True to select the first nup as reference 
 
 #### Variability parameters
