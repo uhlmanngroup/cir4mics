@@ -13,28 +13,25 @@ model: "simple"
 seed: null # Generate new NPCs every run unless a seed is specified 
 
 # Geometric variability. Mean taken from input-model if null
-rvar: 
-    rnew: null # new mean radius
-    rsigma: null # new standard deviation of radius 
+rnew: null # new mean radius
+rsigma: null # new standard deviation of radius 
 
 # Twist between nucleoplasmic and cytoplasmic ring 
-thetavar:
-    thetanew: null # new twist-angle
-    thetasigma: null # Standar deviation of twist-angle
+thetanew: null # new twist-angle
+thetasigma: null # Standar deviation of twist-angle
 
 # Distance between nucleoplasmic and cytoplasmic ring
-dvar:
-    dnew: null # new distance between NR and CR
-    dsigma: null # Standard deviation of distance between NR and CR
+dnew: null # new distance between NR and CR
+dsigma: null # Standard deviation of distance between NR and CR
 
 
 symmet: 80 # rotational symmmetry, default 8 
 kappa:  null # tilt of CR and NR. lower number means more tilt. null is no tilt
 shiftsigma: null #standard deviation of shift between CR and NR in nm
 
-elliptvar:
-    elliptnew: null # New elongation. Correlates with elongation on final NPC
-    elliptsigma: null # Deviation of elongation
+# Elongation
+elliptnew: null # New elongation. Correlates with elongation on final NPC
+elliptsigma: null # Deviation of elongation
 
 # Controls Forces/offsets
 # Irregular variability    

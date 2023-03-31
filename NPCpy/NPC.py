@@ -20,6 +20,7 @@ def getNPCs(var):
     """Input: var (dictionary)
     Output: Dictionary containing simulated NPCs and their metadata
     """
+
     return DeformNPC.MultipleNPC(**var)
     # return DeformNPC.MultipleNPC(var["nup"], var["term"], var["model"], n = var["n"], rel = var["rel"], rvar=var["rvar"], 
     #                                  thetavar = var["thetavar"], dvar = var["dvar"], symmet = var["symmet"], 

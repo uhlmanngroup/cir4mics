@@ -21,13 +21,12 @@ def names(var):
         sigmaStr = str(sigmaName) + "_" + str(sigma) + "_" if sigma else ""  
         return meanStr + sigmaStr
     
-    #var = variables(working_dir, config)
 
     today = date.today()
-    rStr = makeNames(var["rvar"]["rnew"], var["rvar"]["rsigma"], "r_mean", "r_sigma")
-    dStr = makeNames(var["dvar"]["dnew"], var["dvar"]["dsigma"], "dist_mean", "dist_sigma")
-    thetaStr = makeNames(var["thetavar"]["thetanew"], var["thetavar"]["thetasigma"], "twist_ang_mean", "twist_ang_sigma")
-    elongStr = makeNames(var["elliptvar"]["elliptnew"], var["elliptvar"]["elliptsigma"], "elong_mean", "elong_sigma")
+    rStr = makeNames(var["rnew"], var["rsigma"], "r_mean", "r_sigma")
+    dStr = makeNames(var["dnew"], var["dsigma"], "dist_mean", "dist_sigma")
+    thetaStr = makeNames(var["thetanew"], var["thetasigma"], "twist_ang_mean", "twist_ang_sigma")
+    elongStr = makeNames(var["elliptnew"], var["elliptsigma"], "elong_mean", "elong_sigma")
     symmetStr = "_symmet_" + str(var["symmet"]) + "_" if var["symmet"] != 8 else ""
     kappaStr = makeNames(var["kappa"], None, "kappa", None) 
     shiftStr = makeNames(var["shiftsigma"], None, "ring-shift_sigma", None)
@@ -87,7 +86,7 @@ class MakeCSV:
         
         f.write("\nNPC parameters: ##################")
         
-        f.write("\nOrganic deformation parameters: ###########\n")
+        f.write("\nIrregular deformation parameters: ###########\n")
         
         f.write("deformation magnitude, xy: " + str(var["mag"]) + "\n")
         f.write("deformation magnitude, z: " + str(var["zmag"]) + "\n")
@@ -115,7 +114,7 @@ class MakeCSV:
         
         
 class featuresCSV:
-    def __init__(self, nameDict, NPCs, var, name, circle_allrings, ellipse_allrings, data_dir):
+    def __init__(self, NPCs, var, name, circle_allrings, ellipse_allrings, data_dir):
         c_name = ["c_r", "c_sse",  "c_sselat",  "c_sseax", "c_x0", "c_y0", "c_z0", "c_tilt_x", "c_tilt_y", "c_tilt_z"] 
         el_name = ["el_major", "el_minor", "el_q", "el_rot", "el_ssum", "el_ssumXY", "el_ssumZ"]
     
@@ -170,7 +169,7 @@ def col_features(NPCs, circle_CRNR, ellipse_CRNR):
 
 
 class featuresCSV_subcomplex:
-    def __init__(self, NPCs, nameDict, circle_CRNR, ellipse_CRNR, name, data_dir):
+    def __init__(self, NPCs, circle_CRNR, ellipse_CRNR, name, data_dir):
         
         _, idx = np.unique(NPCs["ringmember"], return_index=True)
         memberof = list(NPCs["ringmember"][np.sort(idx)])
@@ -208,7 +207,7 @@ class featuresCSV_subcomplex:
                 
    
 class featuresCSV_rings:
-    def __init__(self, nameDict, NPCs, var, name, data_dir, circle_allrings, ellipse_allrings):
+    def __init__(self, NPCs, var, name, data_dir, circle_allrings, ellipse_allrings):
     
         flattenvalues = lambda NPC_n, key, outputrange: np.array([NPC_n[j][key] for j in outputrange]).flatten()
         

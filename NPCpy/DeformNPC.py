@@ -361,8 +361,8 @@ class DeformNPC:
 # Multiple NPCs 
 
 #DeformNPC()
-def MultipleNPC(nup, term, model, n = 1, rel = False, rvar = None, thetavar = None, 
-                dvar = None, symmet = 8, elliptvar = None, mag = 0, zmag = 0, 
+def MultipleNPC(nup, term, model, n = 1, rel = False, rnew = None, rsigma = None, thetanew = None, thetasigma = None,
+                dnew = None, dsigma = None, symmet = 8, elliptnew = None, elliptsigma = None, mag = 0, zmag = 0, 
                 sigmamult = 0.5, nConnect = 2, damp = 1, kr = 0.7, tlast = 20, step = 0.25, seed = None, kmult = 1, **kwargs):
     """
     Simulate n deformed NPCs using solve_ivp based on a simple, rotationally symmetric node and spring model 
@@ -432,16 +432,16 @@ def MultipleNPC(nup, term, model, n = 1, rel = False, rvar = None, thetavar = No
         ringAngles -= np.mean(ringAngles[nup_i==0])
         thetaold = refNup.rotAng
         thetaoffset = refNup.rotOffset #0, -45 or +45. Only works for 8-fold symmetry
-        if rvar["rnew"] != None: 
-            rvar["rnew"] *= np.mean(rold)/np.mean(refNup.r)
+        if rnew != None: 
+            rnew *= np.mean(rold)/np.mean(refNup.r)
             
-        if dvar["dnew"] != None: 
+        if dnew != None: 
             zref = refNup.z
             midplaneold = np.mean(zold)
             midplaneref = np.mean(zref)
             dabs = np.mean(zold[zold > midplaneold]) - np.mean(zold[zold < midplaneold])
             drel = np.mean(zref[zref > midplaneref]) - np.mean(zref[zref < midplaneref])            
-            dvar["dnew"] += dabs-drel
+            dnew += dabs-drel
     
     ringAnglesOld = np.array(ringAngles)
     
@@ -460,15 +460,15 @@ def MultipleNPC(nup, term, model, n = 1, rel = False, rvar = None, thetavar = No
     else: seeds = np.full(n, None)
     
     # expected values: pretends no standard deviation is applied, to export as metadata  
-    rexp = Change_radius(rold,  rvar["rnew"]) # rsigma, etc, False if not specified 
-    zexp = Change_dist(zold, dvar["dnew"])
+    rexp = Change_radius(rold,  rnew) # rsigma, etc, False if not specified 
+    zexp = Change_dist(zold, dnew)
     
     
     if math.isnan(thetaold): #thetaold will be nan if all nups lie on the same z-plane. 
         ringAnglesExp = ringAnglesOld
         newminTheta = None # updated twist angle. No twist angle if all nups lie on the same z-plane 
     else: 
-        ringAnglesExp, _ = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetavar["thetanew"])
+        ringAnglesExp, _ = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetanew)
 
     # Modification 1 here 
     # dnew = 30
@@ -485,11 +485,11 @@ def MultipleNPC(nup, term, model, n = 1, rel = False, rvar = None, thetavar = No
     for i in range(n): # for each NPC
         # update r, z, angles, and ellipticity 
         nup_is.append(nup_i)
-        r = Change_radius(rold,  rvar["rnew"], rvar["rsigma"], seeds[i])
+        r = Change_radius(rold,  rnew, rsigma, seeds[i])
         if not math.isnan(thetaold): # If Nups lie on different z-planes 
-            z = Change_dist(zold, dvar["dnew"], dvar["dsigma"], seeds[i])
-            ringAngles, newminTheta = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetavar["thetanew"], thetavar["thetasigma"], seeds[i])
-        elliptical = Change_ellipt(elliptvar["elliptnew"], elliptvar["elliptsigma"], seeds[i])
+            z = Change_dist(zold, dnew, dsigma, seeds[i])
+            ringAngles, newminTheta = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetanew, thetasigma, seeds[i])
+        elliptical = Change_ellipt(elliptnew, elliptsigma, seeds[i])
         
         #Modification 2 here  
         # if i in basis + 6:
