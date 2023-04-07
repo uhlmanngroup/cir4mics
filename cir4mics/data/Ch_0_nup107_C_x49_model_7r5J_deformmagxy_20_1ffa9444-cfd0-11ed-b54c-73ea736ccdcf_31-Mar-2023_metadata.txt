@@ -1,0 +1,25 @@
+Ch_0_nup107_C
+model_7r5J
+random seed: 51234
+
+model layout: ###########
+nConnect: 2
+
+NPC parameters: ##################
+Irregular deformation parameters: ###########
+deformation magnitude, xy: 20
+deformation magnitude, z: 10.0
+sigma multiplier 0.5
+
+Geometric NPC properties (input values): ###########
+symmetry: 8
+Nup index per ring: (corresponding to channel): [0 0 0 0]
+Ring membership to subcomplex: ['CR', 'CR', 'NR', 'NR']
+expected radii per ring: [56.1 58.7 56.2 59. ]
+expected z per ring: [55.85 59.61  3.98  0.  ]
+expected ring angles per ring (rad): [ 0.48046368  0.26173942 -0.47234394 -0.26985916]
+twist angle input (rad): 0.04319505913677468
+Nearest rotational unit, NR - CR (degrees): -45.0
+
+changed radii: r sigma 5 
+kappa of von mises-fisher distribution: 40
