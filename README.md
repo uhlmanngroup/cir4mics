@@ -13,11 +13,11 @@ Alternatively use Windows Subsystem for Linux (WSL).
 ## Intallation 
 Open a terminal of choice  
 Clone this repository:  
-Tip: Copy/paste commands to avoid typos 
-`git clone https://github.com/MariaTheiss/NPCpy.git`  
+Tip: Copy/paste commands to avoid typos  
+`git clone https://github.com/MariaTheiss/cir4mics.git`  
 
 Change to the directory folder:  
-`cd NPCpy`  
+`cd cir4mics`  
 
 ### Install poetry 
 `pip install poetry`
@@ -30,15 +30,15 @@ From the same directory as before
 
 ### Open a poetry shell
 Create or start a virtual environment. Packages installed here will be isolated from the rest of the system, avoiding unfavourable crosstalk.  
-`poetry shell`
+`poetry shell`  
 The name of the virtual environment should now be indicated in round brackets to the left of the command line prompt. 
 
 ### Install dependencies 
 Dependencies are installed according to pyproject.toml and poetry.lock  
-`poetry install` 
+`poetry install`  
 
 ### Run the tutorial 
-`jupyter-lab NPCpy/NPC_testlab.ipynb`
+`jupyter-lab cir4mics/NPC_testlab.ipynb`
 
 Everything is properly configured if the tutorial runs to the end.  
 The tutorial can be modified for any specific task.  
@@ -46,11 +46,12 @@ The tutorial can be modified for any specific task.
 ### Run minimal script 
 
 - Start an IDE of your choice 
-- Load NPCpy/NPCpy/call_functions.py
+- Load cir4mics/cir4mics/call_functions.py
 
 ### Run without IDE 
+If you are already aware of what's in call_functions.py, and if it doesn't require modification.  
 
-`poetry run python NPCpy/call_functions` 
+`poetry run python cir4mics/call_functions.py`  
 
 
 ### To exit poetry shell 
@@ -83,15 +84,15 @@ See: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 ## Tutorials 
 ### Simulating NPCs: 
-`jupyter-lab NPCpy/NPC_testlab.ipynb`
+`jupyter-lab cir4mics/NPC_testlab.ipynb`
 
 ### Including new models into the simulator 
-`jupyter-lab NPCpy/Include_models.ipynb`
+`jupyter-lab cir4mics/Include_models.ipynb`
 
 ### Dynamics 
-Dynamics do not reflect true NPC dynamics, but might be useful if hard to predict dynamics are of interest 
+Dynamics do not reflect true NPC dynamics, but might be useful when hard to predict dynamics are of interest 
 
-`jupyter-lab NPCpy/Dynamics.ipynb` 
+`jupyter-lab cir4mics/Dynamics.ipynb` 
 
 ## Contact 
 theiss@ebi.ac.uk 
