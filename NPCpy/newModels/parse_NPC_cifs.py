@@ -13,7 +13,7 @@ import pandas as pd
 from collections import Counter
 
 # set working directory of input-files and where output files are to be stored
-working_dir = '/home/maria/Documents/CoordinatesfromPDB'
+working_dir = '/CoordinatesfromPDB'
 working= os.environ.get("WORKING_DIRECTORY", working_dir)
 if len(sys.argv) > 1: working = sys.argv[1]
 os.chdir( working )

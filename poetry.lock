@@ -1019,6 +1019,45 @@ files = [
 ]
 
 [[package]]
+name = "gemmi"
+version = "0.6.0"
+description = "library for structural biology"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "gemmi-0.6.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:459a9261bfeb22617ed67e7d287f9ec6decd6f32c7164ebcee512450778dcd7c"},
+    {file = "gemmi-0.6.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:55c6444dec912b5f468f3bef2c73dbc2596c3b69e2e7a0c7a6920af5239c8079"},
+    {file = "gemmi-0.6.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:53f36f9580c20e97382d04530da6419474a69ae1a276bc326cb98fb0285d1993"},
+    {file = "gemmi-0.6.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:b1a9aa302cc97490fe30563d37818ca572a0e6db5fa61b0a366c3fcfc26bb076"},
+    {file = "gemmi-0.6.0-cp310-cp310-win_amd64.whl", hash = "sha256:942c0eadbc3c2f9fa10e92f88f4ca06f467d09476adb2453022eedc7cbb83f92"},
+    {file = "gemmi-0.6.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:d9afbc427e3c377ef19f06483b1333b21b555431a30e29860179821ea700bcf3"},
+    {file = "gemmi-0.6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:a125aa0d0ba8d9f62cfe8a7aa482e3d4cd7bf63a36bfa1541e658e1777a3658f"},
+    {file = "gemmi-0.6.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ad88eb8e45f3be71adcbb7d22a232209ea923a744fc841009ed1dc9603606b1b"},
+    {file = "gemmi-0.6.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:5652af8c530b001dc52dea0d96472647563e6c16fdc8c05521ed75e8e6eae849"},
+    {file = "gemmi-0.6.0-cp311-cp311-win_amd64.whl", hash = "sha256:234632b40c6d362bc014fb0ef1abb43bdf38c45951224a1574d50314d7a0612a"},
+    {file = "gemmi-0.6.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:0c2c3a4d212c7abba4f5ee31ceb89539149029901b151f0e825b2e0d1c08de86"},
+    {file = "gemmi-0.6.0-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a76a6527189ee7a8b264e3eb1a3101ee91fe9ee5fc4fc4877b60192c18c2e1d8"},
+    {file = "gemmi-0.6.0-cp36-cp36m-win_amd64.whl", hash = "sha256:83050ea25141aea4b8b751ab46a2c08b406fb2cdc38e0ea0a974a6e19818a26b"},
+    {file = "gemmi-0.6.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:80436bec1096b132c90035f4eb426cfacc4f20bee9c65d4e2ae15c86c7b133a7"},
+    {file = "gemmi-0.6.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:468d03a09b18f99b99d3ed27f14b13249f656eaf9975c6fb07f6d13afba5d6c2"},
+    {file = "gemmi-0.6.0-cp37-cp37m-win_amd64.whl", hash = "sha256:ec75d31aa2845c57298743dc1b0312815c0733fc11ef5a94efec5566be18d8f5"},
+    {file = "gemmi-0.6.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:dc9e9cf7db80ba241a034249c2892e697a132f45fdaa337941388b3083744c67"},
+    {file = "gemmi-0.6.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:37766cb63ec345c482a04297dda23a21c3ecbb979031235b7db855721c9d1955"},
+    {file = "gemmi-0.6.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2e226bf9ddc1dc452452f92622bf01214a80d5d7b9a3326b82692ee3882422cd"},
+    {file = "gemmi-0.6.0-cp38-cp38-win_amd64.whl", hash = "sha256:e3b486987e918df59d59e105d65e7f937366179441c913feb3f6fd1059a4d008"},
+    {file = "gemmi-0.6.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:2426b10b0c3f93a520dd3ecf265f0333ea547e1df8d52bd055c6a41d7c0ca7b3"},
+    {file = "gemmi-0.6.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:84735f97423b05aaa65976f12cf8ec2f919ba30d721e506683c0e97ed26aa5e5"},
+    {file = "gemmi-0.6.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d745bac76136c689bc3bf928d1df50e2cebe331cf6f0e66be1602c7dc0a368a4"},
+    {file = "gemmi-0.6.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:b3affa88837aff2a4bf0c30b762209a2168034a88517f1345b90a1ae99618da1"},
+    {file = "gemmi-0.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:e5ff3b03289734a52ab0443269a5383fbafe56930a73901c88aa8cb79e39785d"},
+    {file = "gemmi-0.6.0-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:58728a66b4cd75ef2e2053a22fe8bb86cecfa648bcd2a9b7ed9f407245cd7d14"},
+    {file = "gemmi-0.6.0-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1748d9e2d96595c6d962d6c64e7f764d4e2d69acae448c5f70474ca6a61e4810"},
+    {file = "gemmi-0.6.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:aeddf98a3004a8dbef5d7c53fed8cb5a9bae73b279ceafdebd07fba6a1c0fd67"},
+    {file = "gemmi-0.6.0.tar.gz", hash = "sha256:21f674eb15d65b79c8751d7cd35c015de58a73ceed1535285ecb0e9e9b0638bc"},
+]
+
+[[package]]
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -4917,4 +4956,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "4e0044a23a0fe8ec30489f4793456c5733c167f129d939364fe90e01d481fe86"
+content-hash = "414d01059509ff222c02996f0239e0b1014bc649caa3b6d431eea4a935526e83"

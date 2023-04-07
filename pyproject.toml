@@ -18,6 +18,7 @@ seaborn = "^0.12.2"
 sympy = "^1.11.1"
 jupyterlab = "^3.6.1"
 ipympl = "^0.9.3"
+gemmi = "^0.6.0"
 
 
 [tool.poetry.group.dev.dependencies]
