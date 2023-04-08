@@ -23,6 +23,7 @@ gemmi = "^0.6.0"
 
 [tool.poetry.group.dev.dependencies]
 spyder = "^5.4.2"
+black = "^23.3.0"
 
 [build-system]
 requires = ["poetry-core"]
