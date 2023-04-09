@@ -26,94 +26,78 @@ from scipy.stats import norm
 import copy
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from IPython.display import HTML
+import NPC
 
 Pos3D = DeformNPC.Pos3D
 Sol3D = DeformNPC.Sol3D
 
 
-def OffsetNPCs(NPCcoords, offset=None, offsetmult=None):
-    """Arrange NPCs on a grid by offsetting them in x and y direction
-    input:
-        NPCcoords: Coordinates of NPC, non-offset
-        offset: distance by which each NPC should be offset. Automatically determined if not provided
-        offsetmult: multiplier of offset. Default 1.25
-    output:
-        NPCoffset: Offset coordinates"""
-
-    offsetmult = 1.25 if not offsetmult else offsetmult
-    offset = offsetmult * np.max(np.abs(NPCcoords[:, :2])) if not offset else offset
-    n = int(NPCcoords[-1, 4] + 1)  # number of NPCs
-    NPCoffset = np.copy(NPCcoords)
-
-    # Determine the number of rows and columns needed. The last cells on the grid might stay empty
-    ncols = math.ceil(np.sqrt(n))
-    nrows = math.ceil(n / ncols)
-
-    x = 0  # indexing x coordinate
-    y = 1  # indexing y coordinate
-    i = 0  # will get updated
-
-    for row in range(ncols):
-        for col in range(nrows):
-            if i < n:
-                NPCoffset[np.where(NPCoffset[:, 4] == i), y] += col * 3 * offset
-                NPCoffset[np.where(NPCoffset[:, 4] == i), x] += row * 3 * offset
-                i += 1
-    return NPCoffset
-
 
 class plotOverview:
+    """ Plot all NPCs
+    :param offsetNPCs: NPC coordinates arranged on a grid 
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param var: Dictionary of simulation parameters
+    :param width: Width of the figure 
+    :param showforces: Show force coordinates, defaults to False
+    :param ellipse: Plot fitted ellipses
+    :param circles: Plot fitted circles
+    :param perRing: Plots circles or ellipses per subcomplex if False, or per Ring if True, defaults to False 
+    :param view: Show plot in front- or side view, "front", or "side". Defaults to "front"
+    "param markersizemult": Multiplier of plot markersize. Defaults to 10. 
+    """
     def __init__(
         self,
-        OffsetNPCs,
+        offsetNPCs,
         NPCs,
         var,
         width=10,
-        membership=0,
-        anchor=True,
-        force=False,
+        showforces:bool=False,
         ellipse=False,
         circle=False,
-        view="front",
+        perRing:bool = False, 
+        view:str="front",
         markersizemult=10,
     ):
-        """OffsetNPCs,
+        """offsetNPCs,
         NPCs,
         var
         """
         self.view = view
         self.markersizemult = markersizemult
-        fcoords = NPCs["fcoords"]
-        forcecoords = DeformNPC.Multiple_coord(fcoords, var["symmet"])
+        if showforces: 
+            self.NPCs = NPCs 
+            self.var = var
+        forcecoords = DeformNPC.Multiple_coord(NPCs["fcoords"], var["symmet"], NPCs["nupIndex"])
+
+        membership = NPCs["z_i_all"] if perRing else NPCs["ringmemall"]
 
         self.OverviewPlot(
-            OffsetNPCs,
+            offsetNPCs,
             forcecoords,
             var["mag"],
             [0],
             membership,
             width,
-            anchor=True,
-            force=False,
-            ellipse=False,
-            circle=False,
+            showforces=showforces,
+            ellipse=ellipse,
+            circle=circle,
         )
 
     def OverviewPlot(
         self,
-        NPCoffset,
-        forces,
+        offsetNPCs,
+        forcecoords,
         mag,
         r,
         membership,
         width,
-        anchor=False,
-        force=False,
+        showforces=False,
         ellipse=False,
         circle=False,
     ):
-        maxr = max(r)
-        n = int(NPCoffset[-1, 4] + 1)  # number of NPCs
+
+        n = int(offsetNPCs[-1, 4] + 1)  # number of NPCs
 
         if n == 1:
             markersize = self.markersizemult * width
@@ -123,8 +107,8 @@ class plotOverview:
             markersize = 0.1 * width
 
         # prepare to colourcode z position
-        zs = NPCoffset[:, 2]
-        nup_i = NPCoffset[:, 3].astype(int)
+        zs = offsetNPCs[:, 2]
+        nup_i = offsetNPCs[:, 3].astype(int)
 
         zcolour = []
         zcolour.extend(ColourcodeZ(list(zs)))
@@ -138,8 +122,8 @@ class plotOverview:
 
         dim2 = 2 if self.view == "side" else 1  # 1 is y-coordinates, 2 is z-coordinates
         for i in np.unique(nup_i):
-            x = NPCoffset[nup_i == i][:, 0]
-            y = NPCoffset[nup_i == i][:, dim2]
+            x = offsetNPCs[nup_i == i][:, 0]
+            y = offsetNPCs[nup_i == i][:, dim2]
             zcolour_subset = [zcolour[j] for j in range(len(zcolour)) if nup_i[j] == i]
             ax.scatter(
                 x,
@@ -155,23 +139,16 @@ class plotOverview:
         ax.spines["bottom"].set_visible(False)
         ax.spines["left"].set_visible(False)
 
-        # if anchor == True:
-        #     Ancoffset = OffsetNPCs(anchors, NPCs, maxr)
-
-        #     ax.scatter(Ancoffset[:,0], Ancoffset[:,1], c = "orange", s = 40*markersize)
-
-        #     for i in range(len(Ancoffset)):
-        #         ax.plot([Ancoffset[i][0], NPCoffset[i][0]], [Ancoffset[i][1], NPCoffset[i][1]], linestyle = ":")
-
-        if force == True:
-            Forceoffset = OffsetNPCs(forces, maxr)
+        if showforces == True:
+            offset = NPC.getNPCcoords(self.NPCs, self.var, justoffset = True)
+            forceoffset = NPC.getOffsetNPCs(forcecoords, offset = offset)
             ax.scatter(
-                Forceoffset[:, 0], Forceoffset[:, 1], c="blue", s=10 * markersize
+                forceoffset[:, 0], forceoffset[:, 1], c="blue", s=2 * markersize, marker = "x"
             )
 
         # fit circle and/or ellipse
         if ellipse:
-            NPCs_ellipse = Analyse_deformed.Ellipses(NPCoffset, membership=membership)
+            NPCs_ellipse = Analyse_deformed.ellipses(offsetNPCs, membership=membership)
             if type(membership[0]) == np.str_:
                 for i in range(n):
                     for key in NPCs_ellipse:
@@ -188,7 +165,7 @@ class plotOverview:
                     ax.scatter(el[:, 0], el[:, 1], lw=1, c="g", alpha=alpha)
 
         if circle:
-            NPCs_circle = Analyse_deformed.Circles(NPCoffset, membership=membership)
+            NPCs_circle = Analyse_deformed.circles(offsetNPCs, membership=membership)
 
             if (
                 type(membership[0]) == np.str_
@@ -310,21 +287,23 @@ def shifttilt_all_t(pos3D, nFrames, centre, tilt):
 
 def plotDetail(
     NPCscoords,
-    NPCs,
-    var,
-    index=0,
+    NPCs:dict,
+    var:dict,
+    index:int=0,
     width=4,
-    mode="3D",
-    showforces=False,
-    trajectory=False,
+    mode:str="3D",
+    showforces:bool=False,
+    trajectory:bool=False,
 ):
-    """
-    Input:
-        - NPCscoords: Coordinates of all NPCs
-        - NPCs: Dictionary containing info of all NPCs
-        - var: simulation variables
-        - index: Index of NPC for which the plot should be generated
-        - mode: "3D" or "2D", default: 3D: 2D or 3D plot
+    """ Generate a detail plot of an NPC with given index
+    :param NPCscoords: Coordinates of all NPCs
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param var: Dictionary of simulation parameters
+    :param index: Index of NPC for which the plot should be generated
+    :param mode: "3D" or "2D", default: 3D: 2D or 3D plot
+    :type mode: str
+    :param showforces: Show deforming forces. Will only be correct if tilt and shift have not been applied
+    :param trajectories: Show trajectories of nodes over time. Will only be correct if tilt and shift have not been applied
     """
 
     NoneOrTilt = lambda a, i: a[i] if type(a) is not type(None) else None
@@ -841,7 +820,7 @@ def Plot3D(
 
     fitellipse = False
     if fitellipse:
-        NPC_ellipse = Analyse_deformed.Ellipses(plotNPC, membership=membership)
+        NPC_ellipse = Analyse_deformed.ellipses(plotNPC, membership=membership)
         if type(membership[0]) == np.str_:
             for key in NPC_ellipse:
                 el = plotEllipse(NPC_ellipse[key][0])
@@ -854,7 +833,7 @@ def Plot3D(
 
     fitcircle = False
     if fitcircle:
-        NPCs_circle = Analyse_deformed.Circles(plotNPC, membership=membership)
+        NPCs_circle = Analyse_deformed.circles(plotNPC, membership=membership)
 
         if type(membership[0]) == np.str_:
             for key in NPCs_circle:
@@ -1107,11 +1086,11 @@ if __name__ == "__main__":
 
 
 def AnimateOverview(
-    NPCs, OffsetNPCs, var, width=8, directory="", name=None, ext=".gif"
+    NPCs, offsetNPCs, var, width=8, directory="", name=None, ext=".gif"
 ):
     AnimateAll(
         NPCs["NPCs"],
-        OffsetNPCs,
+        offsetNPCs,
         NPCs["fcoords"],
         var["symmet"],
         NPCs["rexp"],
@@ -1126,7 +1105,7 @@ class AnimateAll(object):
     """An animated scatter plot using matplotlib.animations.FuncAnimation."""
 
     def __init__(
-        self, NPCs, OffsetNPCs, forcecoords, symmet, r, width, directory, name, ext
+        self, NPCs, offsetNPCs, forcecoords, symmet, r, width, directory, name, ext
     ):
         self.n = len(NPCs)
         self.tmax = len(NPCs[0][0].t)
@@ -1136,7 +1115,7 @@ class AnimateAll(object):
         self.symmet = symmet
         self.nRings = len(NPCs[0])
         self.nup_i_all = list(
-            OffsetNPCs[:, 3]
+            offsetNPCs[:, 3]
         )  # indicates which nup each point belongs to
 
         # self.anccoords = deepcopy(anccoords)
@@ -1199,10 +1178,10 @@ class AnimateAll(object):
         xy0 = []
 
         xy = []
-        for NPC in range(self.n):
+        for npc in range(self.n):
             for ring in range(self.nRings):
                 xy0.append(
-                    Pos3D(NPCsCopy[NPC][ring])
+                    Pos3D(NPCsCopy[npc][ring])
                 )  # [:, np.append(np.arange(self.symmet), 0)])
 
         for frame in range(self.tmax):
@@ -1302,8 +1281,8 @@ class gethistdata:
     ):
         self.width = width
         self.bins = bins
-        # featuresAll, _, _ = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)
-        # featuresElAll, _, _ = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
+        # featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)
+        # featuresElAll = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
         # _, _, _, _, featuresel3DAll = exportCSV.col_features(NPCs, circle_CRNR, ellipse_CRNR)
 
         self.rc1 = featuresAll[:, 0]  # circle radius

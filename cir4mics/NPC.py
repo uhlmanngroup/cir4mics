@@ -7,19 +7,25 @@ Created on Wed Mar  8 11:25:03 2023
 """
 import yaml
 import DeformNPC
-
+import numpy as np
+import math
 
 def getVars(config):
-    """reads a .yaml file and turns it into a python dictionary"""
+    """reads a .yaml file and turns it into a python dictionary
+    
+    :param config: yaml file to be read 
+    :returns: var, a python dictionary version of the config file, which can 
+    be modified 
+    """
     with open(config) as file:
         var = dict(yaml.load(file, Loader=yaml.FullLoader))
-
     return var
 
 
 def getNPCs(var):
-    """Input: var (dictionary)
-    Output: Dictionary containing simulated NPCs and their metadata
+    """
+    :param var: dictionary of simulation parameters
+    returns: Dictionary containing simulated NPCs and their metadata
     """
 
     return DeformNPC.MultipleNPC(**var)
@@ -28,8 +34,52 @@ def getNPCs(var):
     #                                  elliptvar = var["elliptvar"], mag = var["mag"], zmag = var["zmag"], seed = var["seed"])
 
 
-def getNPCcoords(NPCs, var):
-    """Input: NPCs, var"""
+
+
+def getOffsetNPCs(NPCcoords, offset=None, offsetmult=None, justoffset:bool = False):
+    """Arrange NPCs on a grid by offsetting them in x and y direction
+    input:
+        NPCcoords: Coordinates of NPC, non-offset
+        offset: distance by which each NPC should be offset. Automatically determined if not provided
+        offsetmult: multiplier of offset. Default 1.25
+    output:
+        NPCoffset: Offset coordinates"""
+
+    offsetmult = 1 if not offsetmult else offsetmult
+    offset = offsetmult * np.max(np.abs(NPCcoords[:, :2])) if not offset else offset
+  
+    if not justoffset:  
+        n = int(NPCcoords[-1, 4] + 1)  # number of NPCs
+        NPCoffset = np.copy(NPCcoords)
+
+
+        # Determine the number of rows and columns needed. The last cells on the grid might stay empty
+        ncols = math.ceil(np.sqrt(n))
+        nrows = math.ceil(n / ncols)
+    
+        x = 0  # indexing x coordinate
+        y = 1  # indexing y coordinate
+        i = 0  # will get updated
+    
+        for row in range(ncols):
+            for col in range(nrows):
+                if i < n:
+                    NPCoffset[np.where(NPCoffset[:, 4] == i), y] += col * 3 * offset
+                    NPCoffset[np.where(NPCoffset[:, 4] == i), x] += row * 3 * offset
+                    i += 1
+    
+        return NPCoffset
+    return offset
+
+
+def getNPCcoords(NPCs, var, offset:bool=False, offsetmult = 1, justoffset:bool = False):
+    """
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param var: Dictionary of simulation parameters
+    :param offset: NPCs are arranged on a grid if True. Offset can be applied as 
+    a separate function if both offset and non-offset NPCs are required. Defaults to False
+    :returns: Coordinates of NPCs or coordinates of NPCs and offset coordinates of NPCs of offet = True
+    """
     npcs = NPCs["NPCs"]  # Does not yet include tilt and shift
     nupIndex = NPCs["nupIndex"]
 
@@ -41,7 +91,8 @@ def getNPCcoords(NPCs, var):
         var["shiftsigma"], var["n"], var["seed"]
     )
 
-    return DeformNPC.MultipleNPCs_coord(
+
+    NPCscoords = DeformNPC.MultipleNPCs_coord(
         npcs,
         zoffsets,
         var["symmet"],
@@ -53,3 +104,13 @@ def getNPCcoords(NPCs, var):
         shiftCyt,
         seed=var["seed"],
     )
+    
+    if justoffset:
+        return getOffsetNPCs(NPCscoords, justoffset = justoffset)
+    
+    if offset: 
+        return NPCscoords, getOffsetNPCs(NPCscoords, offsetmult=offsetmult)  
+    
+    return NPCscoords
+
+    

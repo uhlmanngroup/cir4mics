@@ -12,11 +12,19 @@ from warnings import warn
 from itertools import compress
 
 
-def Ellipses(NPCscoords, membership=None):
-    """ringmode = 'CRNR', 'z' or None"""
-    # if str(ringmode) not in {"CRNR", "z", "None"}: raise ValueError("Wrong ringmode")
-
-    # n = int(NPCscoords[-1][-1] + 1) # total number of NPCs
+def ellipses(NPCscoords, membership=None):
+    """Fit ellipses to the NPC or its subcomponents 
+    
+    :param NPCscoords: Coordinates of the NPC 
+    :param membership: information to which part of the NPC ellipses should be fitted. 
+    if membership = NPCs["ringmemall"], ellipses will be fitted to subcomplexes. 
+    if mempership = NPCs["z_i_all"], ellipses will be fitted to rings. 
+    if membership = None, ellipses will be fitted to the whole NPC. Defaults to None. 
+    :type membership: NoneType, or numpy.ndarray
+    :return: features of fitted ellipses per NPC 
+    :rtype: list for membership = NPCs["z_i_all"] or membership = None, dict (for membership = NPCs["ringmemall"])
+    
+    """
     n = len(np.unique(NPCscoords[:, -1]))  # number of NPCs
     iplus1 = int(NPCscoords[-1][-1] + 1)  # index+1 of last or only NPC
 
@@ -345,7 +353,19 @@ def align2ellipse(NPC, x0, y0, elfeatures, z=None, ring=None):
 #########################################################################
 
 
-def Circles(NPCscoords, membership=None):
+def circles(NPCscoords, membership=None):
+    """Fit circles to the NPC or its subcomponents 
+    
+    :param NPCscoords: Coordinates of the NPC 
+    :param membership: information to which part of the NPC circles should be fitted. 
+    if membership = NPCs["ringmemall"], circles will be fitted to subcomplexes. 
+    if mempership = NPCs["z_i_all"], circles will be fitted to rings. 
+    if membership = None, circles will be fitted to the whole NPC. Defaults to None. 
+    :type membership: NoneType, or numpy.ndarray
+    :return: features of fitted circles per NPC 
+    :rtype: list for membership = NPCs["z_i_all"] or membership = None, dict (for membership = NPCs["ringmemall"])
+    
+    """
     n = len(np.unique(NPCscoords[:, -1]))  # number of NPCs
     iplus1 = int(NPCscoords[-1][-1] + 1)  # index+1 of last or only NPC
 
@@ -502,15 +522,28 @@ def fitCircle(NPC):
     ]  # [xc, yc, np.round(r, 2), residual] # TODO: change back
 
 
-def meanfeaturesC(NPCs, var, circle_allrings):
-    """return FeaturesAll, centreAll, tiltAll"""
+def meanfeaturesC(NPCs, var, circle_allrings:list, full:bool = False):
+    """
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param var: Dictionary of simulation parameters
+    :param circle_allrings: features of circles fitted to each NPC ring 
+    :param full: indicates whether to also return centreAll and tiltAll, default False 
+    :return: featuresAll, shape (n NPCs, 4)
+    featuresAll[:,0]: mean NPC circle radius 
+    featuresAll[:,1]: mean sum of squared errors (SSE) of circles fitted per NPC 
+    featuresAll[:, 2]: mean SSE in lateral direction of circles fitted per NPC 
+    featuresAll[:, 3]: mean SSE in axial direction of circles fitted per NPC 
+    optional: 
+    centreAll: shape (n NPCs, 3): mean centre per NPC, determined by fitting circles 
+    tiltAll:  shape (n NPCs, 3): mean tilt of NPC, determined by fitting circles 
+    """
     z_i_ring = np.repeat(
         [i for i in range(var["n"])], len(NPCs["zexp"])
     )  # index that assigns each ring to an NPC
     n = len(np.unique(z_i_ring))  # n NPCs
     featuresAll = np.zeros((n, 4))  # 4 because radius, SSE, SSE lateral, SSE axial
-    centreAll = np.zeros((n, 3))  # 3 because 3D
-    tiltAll = np.zeros((n, 3))  # 3 because 3D
+
+
 
     for i in range(n):
         circle_NPC_n = list(
@@ -525,16 +558,40 @@ def meanfeaturesC(NPCs, var, circle_allrings):
                 for k in range(4)
             ]
         )  # r, sqsum, residual, zsqsum
-        centreAll[i] = np.mean(
-            [circle_NPC_n[j][4] for j in range_n_rings_in_i], axis=0
-        )  # centre per NPC
-        tiltAll[i] = np.mean(
-            [circle_NPC_n[j][5] for j in range_n_rings_in_i], axis=0
-        )  # tilt per NPC
-    return featuresAll, centreAll, tiltAll
+        
+        
+    if full: 
+        centreAll = np.zeros((n, 3))  # 3 because 3D
+        tiltAll = np.zeros((n, 3))  # 3 because 3D     
+        for i in range(n):
+                
+            
+            centreAll[i] = np.mean(
+                [circle_NPC_n[j][4] for j in range_n_rings_in_i], axis=0
+            )  # centre per NPC
+            tiltAll[i] = np.mean(
+                [circle_NPC_n[j][5] for j in range_n_rings_in_i], axis=0
+            )  # tilt per NPC
+        return featuresAll, centreAll, tiltAll
+    
+    return featuresAll
 
-
-def meanfeaturesE(NPCs, var, ellipse_allrings, el_name=False):
+def meanfeaturesE(NPCs, var, ellipse_allrings:list, el_name=False, full = False):
+    """
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param var: Dictionary of simulation parameters
+    :param ellipse_allrings: features of ellipses fitted to each NPC ring
+    :type ellipse_allrings: list of dictionaries
+    :param el_name: list of feature names, corrsponding to keys in ellipse_allring. 
+    ["el_major", "el_minor", "el_q" "el_rot", "el_ssum", "el_ssumXY", "el_ssumZ"] if False. Defaults to False. 
+    :return: 
+    featuresElAll: Mean features per NPC determined by averaging ring-wise fitted ellipses. 
+        shape (nNPCs, n features), n features is 7 by default, corresponding to el_name: 
+        length major axis, length minor axis, ratio minor/major, azimuthal angle ellipse, 
+        sum of square errors, sum of square errors in lateral direction, sum of square errors in axial direction
+    centreElAll: shape (n NPCs, 3): mean centre per NPC, determined by fitting ellipses 
+    tiltElAll:  shape (n NPCs, 3): mean tilt of NPC, determined by fitting ellipses 
+    """
     z_i_ring = np.repeat([i for i in range(var["n"])], len(NPCs["zexp"]))
 
     if el_name == False:
@@ -549,8 +606,7 @@ def meanfeaturesE(NPCs, var, ellipse_allrings, el_name=False):
         ]
     n = len(np.unique(z_i_ring))  # n NPCs
     featuresElAll = np.zeros((n, len(el_name)))
-    centreElAll = np.zeros((n, 3))  # 3 because 3D
-    tiltElAll = np.zeros((n, 3))  # 3 because 3D
+
 
     for i in range(n):
         ellipse_NPC_n = list(compress(ellipse_allrings, z_i_ring == i))
@@ -562,14 +618,20 @@ def meanfeaturesE(NPCs, var, ellipse_allrings, el_name=False):
                 for i in el_name
             ]
         )
-        centreElAll[i] = np.mean(
-            [ellipse_NPC_n[i]["Ce"] for i in range_n_rings_in_i], axis=0
-        )
-        tiltElAll[i] = np.mean(
-            [ellipse_NPC_n[i]["normal2"] for i in range_n_rings_in_i], axis=0
-        )
-
-    return featuresElAll, centreElAll, tiltElAll
+    
+    if full: 
+        centreElAll = np.zeros((n, 3))  # 3 because 3D
+        tiltElAll = np.zeros((n, 3))  # 3 because 3D    
+        for i in range(n):
+            centreElAll[i] = np.mean(
+                [ellipse_NPC_n[i]["Ce"] for i in range_n_rings_in_i], axis=0
+            )
+            tiltElAll[i] = np.mean(
+                [ellipse_NPC_n[i]["normal2"] for i in range_n_rings_in_i], axis=0
+            )
+    
+        return featuresElAll, centreElAll, tiltElAll
+    return featuresElAll
 
 
 def angles(entriestiltAll):

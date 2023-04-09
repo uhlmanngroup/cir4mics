@@ -82,7 +82,7 @@ def names(var):
 
 class MakeCSV:
     def __init__(self, var, NPCs, printNPC, nameDict, name, data_dir):
-        """Export CSV file. printNPC is either OffsetNPCs or NPCscoords.
+        """Export CSV file. printNPC is either offsetNPCs or NPCscoords.
         Choose NPCscoords if photophysics simulations software introduces offsets to NPCs, i.e. arranges them on a grid
         """
 
@@ -92,8 +92,6 @@ class MakeCSV:
                 csvfile, delimiter=",", quotechar="|", quoting=csv.QUOTE_MINIMAL
             )
             writer1.writerow(["x", "y", "z", "channel", "particle"])
-
-            # printNPC = OffsetNPCs if offset else NPCscoords
 
             for i in range(len(printNPC)):
                 # writer1.writerow([printNPC[i,0], printNPC[i,1], printNPC[i,2], printNPC[i,3].astype(int)])
@@ -219,10 +217,10 @@ class featuresCSV:
             )
 
             featuresAll, centreAll, tiltAll = Analyse_deformed.meanfeaturesC(
-                NPCs, var, circle_allrings
+                NPCs, var, circle_allrings, full = True
             )
             featuresElAll, centreElAll, tiltElAll = Analyse_deformed.meanfeaturesE(
-                NPCs, var, ellipse_allrings, el_name
+                NPCs, var, ellipse_allrings, el_name, full = True
             )
 
             for i in range(var["n"]):

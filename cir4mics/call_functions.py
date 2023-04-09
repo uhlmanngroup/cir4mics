@@ -11,6 +11,7 @@ import exportCSV
 import NPC
 import NPC_plotting
 import Analyse_deformed
+#import utility
 
 # import numpy as np
 
@@ -21,17 +22,16 @@ data_dir = "./data/"  # Directory for output files
 config = "config.yaml"
 var = NPC.getVars(config)  # Transform config file into a python dictionary
 
-
 #### Adjust simulation parameters
-var["n"] = 42  # Number of NPCs to be simulated
+var["n"] = 7  # Number of NPCs to be simulated
 NPCi = (
     0  # index out of n of NPC to be shown in any detail-plot or animation. 0-indexed.
 )
 var["seed"] = 54648  # seed for reproducibility. Any number but 0
 
 ## Select one or more nups, their terminus, and an NPC model for simulation
-var["nup"] = ("nup107", "nup96")
-var["term"] = ("N", "C")
+var["nup"] = ("nup107",)
+var["term"] = ("N",)
 var["model"] = "5a9q"
 # var["rel"] = True # remove the "#" before var["rel"] = True to select the first nup as reference
 
@@ -68,12 +68,11 @@ var["zmag"] = var["mag"] / 2  # magnitude of offset in z. Not computed via sprin
 
 #### Run simulations
 NPCs = NPC.getNPCs(var)  # Dictionary of all simulated NPCs
-NPCscoords = NPC.getNPCcoords(NPCs, var)
-OffsetNPCs = NPC_plotting.OffsetNPCs(NPCscoords, offsetmult=1)  # Not always required
+NPCscoords, offsetNPCs = NPC.getNPCcoords(NPCs, var, offset=True)
 
 #### Visualisation
 # Overview
-NPC_plotting.plotOverview(OffsetNPCs, NPCs, var, width=10)
+NPC_plotting.plotOverview(offsetNPCs, NPCs, var, width=10)
 
 # NPC_plotting.positionVStime(NPCs, index = NPCi, legend = True)
 NPC_plotting.plotDetail(
@@ -82,20 +81,18 @@ NPC_plotting.plotDetail(
 # %matplotlib qt # run to view animation. Default is %matplotlib inline
 # name = None #
 # Run line below twice if animation doesn't show
-# NPC_plotting.AnimateOverview(NPCs, OffsetNPCs, var, width = 12, directory = data_dir, name = name, ext = ".gif")
+# NPC_plotting.AnimateOverview(NPCs, offsetNPCs, var, width = 12, directory = data_dir, name = name, ext = ".gif")
 
 #### Analyse generated NPCs
-ellipse_allrings = Analyse_deformed.Ellipses(NPCscoords, membership=NPCs["z_i_all"])
-ellipse_CRNR = Analyse_deformed.Ellipses(NPCscoords, membership=NPCs["ringmemall"])
+ellipse_allrings = Analyse_deformed.ellipses(NPCscoords, membership=NPCs["z_i_all"])
+ellipse_CRNR = Analyse_deformed.ellipses(NPCscoords, membership=NPCs["ringmemall"])
 
-circle_allrings = Analyse_deformed.Circles(NPCscoords, membership=NPCs["z_i_all"])
-circle_CRNR = Analyse_deformed.Circles(NPCscoords, membership=NPCs["ringmemall"])
+circle_allrings = Analyse_deformed.circles(NPCscoords, membership=NPCs["z_i_all"])
+circle_CRNR = Analyse_deformed.circles(NPCscoords, membership=NPCs["ringmemall"])
 
 # Compute further features
-featuresAll, _, _ = Analyse_deformed.meanfeaturesC(
-    NPCs, var, circle_allrings
-)  # Circle features
-featuresElAll, _, _ = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
+featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)  # Circle features
+featuresElAll = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
 _, _, _, _, featuresel3DAll = exportCSV.col_features(NPCs, circle_CRNR, ellipse_CRNR)
 
 # featuresAll: r, sqsum, residual, zsqsum of circle per NPC

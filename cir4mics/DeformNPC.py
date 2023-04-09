@@ -814,11 +814,11 @@ def MultipleNPCs_coord(
     shiftCyt,
     seed=None,
     frame=-1,
-):  # TODO: 3D
+):  
     "Input is OdeResults for each NPC in a list. Output is just the final coordinates of each NPC"
 
     nNPCs = len(NPCs)
-    nRings = len(NPCs[0])  # TODO:
+    nRings = len(NPCs[0])  
     NPCscoord = np.zeros(
         (nNPCs * nRings * symmet, 5)
     )  # number of nodes, dimensions + label #TODO: more general
@@ -979,23 +979,19 @@ def tiltvectors(kappa, nNPCs, seed):  # TODO: cite
     return tiltnucv, tiltcytv
 
 
-def Multiple_coord(coords, symmet):  # TODO: 3D
+def Multiple_coord(coords, symmet, nupIndex):  
     "Input is a list of coordinates seperated by NPC. output is all coordinates"
 
     nNPCs = len(coords)
     nRings = len(coords[0])
 
     coords_reshaped = np.reshape(coords, (nNPCs * nRings * symmet, 3))  # 3 Dim
+
+    nupi = np.repeat(nupIndex, symmet)
     i = np.repeat(np.arange(nNPCs), symmet * nRings)
 
-    return np.c_[(coords_reshaped, i)]
 
-
-# r = R.from_euler('xyz', [45,0,0], degrees = True)
-# NPCrot = r.apply(plotNPC[:,:3])
-
-# plt.scatter(NPCrot[:,0], NPCrot[:,1])
-# plt.gca().set_aspect('equal', adjustable='box')
+    return np.c_[(coords_reshaped, nupi, i)]
 
 
 rotC = np.random.vonmises(0, 0, size=10000)  # 4*np.pi)
