@@ -16,6 +16,13 @@ from itertools import compress
 
 
 def names(var):
+    """
+    Generates a name dictionary and a unique name for a simulation experiment described by var. 
+    The name dictionary contains changed parameters to be written into metadata file. 
+    :param var: Dictionary of simulation parameters
+    :returns: nameDict: Dictionary of simulation features. Default features are saved as empty strings. 
+    name: Unique part of name of a given simulation experiment 
+    """
     def makeNames(mean, sigma, meanName, sigmaName, forTitle=True):
         meanStr = str(meanName) + "_" + str(mean) + "_" if mean else ""
         sigmaStr = str(sigmaName) + "_" + str(sigma) + "_" if sigma else ""
@@ -82,9 +89,17 @@ def names(var):
 
 class MakeCSV:
     def __init__(self, var, NPCs, printNPC, nameDict, name, data_dir):
-        """Export CSV file. printNPC is either offsetNPCs or NPCscoords.
-        Choose NPCscoords if photophysics simulations software introduces offsets to NPCs, i.e. arranges them on a grid
-        """
+        """Export a CSV file and a file containing metadata 
+       :param var: Dictionary of simulation parameters
+       :param NPCs: Dictionary containing simulated NPCs and their metadata
+       :param printNPC: NPC coordinates to be exported, so either offsetNPCs or NPCscoords. 
+       offsetNPCs should be chosen if the downstream photophysics simulation software does not introduce an offset to structures, 
+       NPCscoords should be chosen if downstream photophysics simulation software introduces an offset to structures. 
+       :param nameDict: Dictionary of changed parameters 
+       :param name: Unique part of name to save output csv file and metadata file 
+       :param data_dir: Directory for output files
+        
+       """
 
         self.csvpath = data_dir + name + ".csv"
         with open(self.csvpath, "w", newline="") as csvfile:
@@ -180,6 +195,16 @@ class MakeCSV:
 
 class featuresCSV:
     def __init__(self, NPCs, var, name, circle_allrings, ellipse_allrings, data_dir):
+        """
+        Generate a CSV file that contains averaged features per NPC. 
+        :param var: Dictionary of simulation parameters
+        :param NPCs: Dictionary containing simulated NPCs and their metadata
+        :param name: Unique part of name to save output csv file and metadata file 
+        :param circle_allrings: Features of circles fitted to all NPC rings, these will be averaged per NPC. 
+        :param ellipse_allrings: Features of ellipses fitted to all NPC rings, these will be averaged per NPC. 
+        :param data_dir: Directory for output files
+        """
+        
         c_name = [
             "c_r",
             "c_sse",
@@ -236,14 +261,26 @@ class featuresCSV:
 
 
 def col_features(NPCs, circle_CRNR, ellipse_CRNR):
-    """features per subcomplex"""
+    """Compute features per subcomplex
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param circle_CRNR: features of circles fitted to subcomplexes 
+    :param ellipse_CRNR: featurs of ellipses fitted to subcomplexes 
+    :returns: entriesAll: radius,  mean sum of squared errors (SSE), SSE in lateral direction, 
+    SSE in axial direction of circles fitted to subcomplexes, columns grouped by type of feature 
+    entriescenAll: (n NPCs, (3 dim * n subcomplexes)) centre coordinates per subcomplex, determined by fitting circles 
+    entriestiltAll: (n NPCs, (3 dim * n subcomplexes)) tilt coordinates per subcomplex, determined by fitting circles 
+    featureselAll: of fitted ellipse per subcomplex: major axis, minor axis, ratio minor/major axis, azimuthal rotation angle, 
+    mean sum of squared errors (SSE), SSE in lateral direction, SSE in axial direction, columns grouped by feature 
+    """
     _, idx = np.unique(NPCs["ringmember"], return_index=True)
+    dim = 3  # dimensions
     memberof = list(
         NPCs["ringmember"][np.sort(idx)]
     )  # list of subcomplexes, e.g. ['CR', 'NR']
-    dim = 3  # dimensions
-
-    feat1D = ["r", "SSE", "SSE_l", "SSE_a"]  # 1D features circle
+    subs = len(memberof)
+    n = len(NPCs["NPCs"])
+    
+    
     featEl = [
         "el_minor",
         "el_major",
@@ -252,55 +289,89 @@ def col_features(NPCs, circle_CRNR, ellipse_CRNR):
         "el_ssum",
         "el_ssumXY",
         "el_ssumZ",
-        "Ce",
-        "normal2",
     ]
+    
     nfEl = len(featEl)
 
-    subs = len(memberof)
-    n = len(NPCs["NPCs"])
+    feat1D = ["r", "SSE", "SSE_l", "SSE_a"]  # 1D features circle
     entriesAll = np.zeros((n, len(feat1D) * subs))
     entriescenAll = np.zeros((n, dim * subs))
     entriestiltAll = np.zeros((n, dim * subs))
-    featureselAll = np.zeros((n, (nfEl - 2) * subs))
+    featureselAll = np.zeros((n, (nfEl) * subs))
+
+    for npc in range(n):
+        entriesAll[npc] = np.array(
+            [circle_CRNR[sub][npc][i] for i in range(len(feat1D)) for sub in memberof]
+        )  # e.g. CR, NR, CR, NR ...
+        entriescenAll[npc] = np.array(
+            [
+                circle_CRNR[sub][npc][4][i]
+                for sub in memberof
+                for i in range(len(circle_CRNR[sub][npc][4]))
+            ]
+        )
+        entriestiltAll[npc] = np.array(
+            [
+                circle_CRNR[sub][npc][5][i]
+                for sub in memberof
+                for i in range(len(circle_CRNR[sub][npc][5]))
+            ]
+        )
+        
+        entriesel = [
+            ellipse_CRNR[sub][npc][featEl[i]] for i in range(nfEl) for sub in memberof
+        ]  # entries alterate between subcomplexes
+        
+        featureselAll[npc] = np.array(entriesel)  # 'el_minor', 'el_major', 'el_q', 'el_rot', 'el_ssum', 'el_ssumXY', 'el_ssumZ'
+        
+
+    featuresel3DAll = colfeaturesEl3D(NPCs, ellipse_CRNR)
+    
+    return entriesAll, entriescenAll, entriestiltAll, featureselAll, featuresel3DAll
+
+
+
+def colfeaturesEl3D(NPCs, ellipse_CRNR):
+    """ Tilt and centre coordinates of subcomplexes, determined by fitting ellipses 
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param circle_CRNR: features of circles fitted to subcomplexes
+    :returns: featuresel3DAll: centre coordinates per subcomplex, tilt coordinates per subcomplex, determined by fitting circles.  
+    """
+    _, idx = np.unique(NPCs["ringmember"], return_index=True)
+    memberof = list(
+        NPCs["ringmember"][np.sort(idx)]
+    )  # list of subcomplexes, e.g. ['CR', 'NR']
+    dim = 3  # dimensions
+
+    featEl = ["Ce", "normal2",]
+    nfEl = len(featEl)
+    subs = len(memberof)
+    n = len(NPCs["NPCs"])
     featuresel3DAll = np.zeros((n, 2 * dim * subs))
 
-    for NPC in range(n):
-        entriesAll[NPC] = np.array(
-            [circle_CRNR[sub][NPC][i] for i in range(len(feat1D)) for sub in memberof]
-        )  # e.g. CR, NR, CR, NR ...
-        entriescenAll[NPC] = np.array(
-            [
-                circle_CRNR[sub][NPC][4][i]
-                for sub in memberof
-                for i in range(len(circle_CRNR[sub][NPC][4]))
-            ]
-        )
-        entriestiltAll[NPC] = np.array(
-            [
-                circle_CRNR[sub][NPC][5][i]
-                for sub in memberof
-                for i in range(len(circle_CRNR[sub][NPC][5]))
-            ]
-        )
 
+    for npc in range(n):     
         entriesel = [
-            ellipse_CRNR[sub][NPC][featEl[i]] for i in range(nfEl) for sub in memberof
+            ellipse_CRNR[sub][npc][featEl[i]] for i in range(nfEl) for sub in memberof
         ]  # entries alterate between subcomplexes
-        featureselAll[NPC] = np.array(
-            entriesel[: len(memberof) * 7]
-        )  # 'el_minor', 'el_major', 'el_q', 'el_rot', 'el_ssum', 'el_ssumXY', 'el_ssumZ'
-        featuresel3DAll[NPC] = np.array(
-            entriesel[len(memberof) * 7 :]
-        ).flatten()  # 'Ce', 'normal2', alternating by subcomplex
-
-    return entriesAll, entriescenAll, entriestiltAll, featureselAll, featuresel3DAll
+        
+        featuresel3DAll[npc] = np.array(entriesel).flatten()  # 'Ce', 'normal2', alternating by subcomplex
+        
+    return featuresel3DAll
 
 
 class featuresCSV_subcomplex:
     def __init__(self, NPCs, circle_CRNR, ellipse_CRNR, name, data_dir):
         _, idx = np.unique(NPCs["ringmember"], return_index=True)
         memberof = list(NPCs["ringmember"][np.sort(idx)])
+        """
+        Generate a CSV file that contains features for each NPC subcomplex. 
+        :param NPCs: Dictionary containing simulated NPCs and their metadata
+        :param circle_CRNR: Features of circles fitted to the NPC subcomplexes. 
+        :param ellipse_CRNR: Features of ellipses fitted to the NPC subcomplexes. 
+        :param name: Unique part of name to save output csv file and metadata file 
+        :param data_dir: Directory for output files
+        """
 
         col = ["r", "SSE", "SSE_l", "SSE_a"]
         col2 = ["Cx", "Cy", "Cz"]
@@ -323,7 +394,7 @@ class featuresCSV_subcomplex:
         ]
         columnsel = [c + "_" + mem for c in colel[:7] for mem in memberof]
         cenel = ["el_" + c + "_" + mem for mem in memberof for c in col2]
-        tiltel = ["el_ " + c + "_" + mem for mem in memberof for c in col3]
+        tiltel = ["el_" + c + "_" + mem for mem in memberof for c in col3]
 
         self.csvpath = data_dir + "NPC_features_subcomplex_" + name + ".csv"
         with open(self.csvpath, "w", newline="") as csvfile:  # TODO: change directory
@@ -358,6 +429,15 @@ class featuresCSV_subcomplex:
 
 class featuresCSV_rings:
     def __init__(self, NPCs, var, name, data_dir, circle_allrings, ellipse_allrings):
+        """
+        Generate a CSV file that contains features for each NPC ring. 
+        :param NPCs: Dictionary containing simulated NPCs and their metadata
+        :param var: Dictionary of simulation parameters
+        :param name: Unique part of name to save output csv file and metadata file 
+        :param data_dir: Directory for output files
+        :param circle_allrings: Features of circles fitted to all NPC rings.
+        :param ellipse_allrings: Features of ellipses fitted to all NPC rings. 
+        """
         flattenvalues = lambda NPC_n, key, outputrange: np.array(
             [NPC_n[j][key] for j in outputrange]
         ).flatten()
@@ -475,12 +555,4 @@ class featuresCSV_rings:
                 )
 
 
-def previewCSV(namespace, lines=5):
-    count = 0
-    with open(namespace) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=",")
-        for row in csv_reader:
-            print(row)
-            count += 1
-            if count > lines:
-                break
+

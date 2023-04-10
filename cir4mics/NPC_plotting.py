@@ -34,18 +34,6 @@ Sol3D = DeformNPC.Sol3D
 
 
 class plotOverview:
-    """ Plot all NPCs
-    :param offsetNPCs: NPC coordinates arranged on a grid 
-    :param NPCs: Dictionary containing simulated NPCs and their metadata
-    :param var: Dictionary of simulation parameters
-    :param width: Width of the figure 
-    :param showforces: Show force coordinates, defaults to False
-    :param ellipse: Plot fitted ellipses
-    :param circles: Plot fitted circles
-    :param perRing: Plots circles or ellipses per subcomplex if False, or per Ring if True, defaults to False 
-    :param view: Show plot in front- or side view, "front", or "side". Defaults to "front"
-    "param markersizemult": Multiplier of plot markersize. Defaults to 10. 
-    """
     def __init__(
         self,
         offsetNPCs,
@@ -59,9 +47,17 @@ class plotOverview:
         view:str="front",
         markersizemult=10,
     ):
-        """offsetNPCs,
-        NPCs,
-        var
+        """ Plot all NPCs
+        :param offsetNPCs: NPC coordinates arranged on a grid 
+        :param NPCs: Dictionary containing simulated NPCs and their metadata
+        :param var: Dictionary of simulation parameters
+        :param width: Width of the figure 
+        :param showforces: Show force coordinates, defaults to False
+        :param ellipse: Plot fitted ellipses
+        :param circles: Plot fitted circles
+        :param perRing: Plots circles or ellipses per subcomplex if False, or per Ring if True, defaults to False 
+        :param view: Show plot in front- or side view, "front", or "side". Defaults to "front"
+        "param markersizemult": Multiplier of plot markersize. Defaults to 10. 
         """
         self.view = view
         self.markersizemult = markersizemult
@@ -851,14 +847,15 @@ def Plot3D(
 # %matplotlib qt
 
 
-def AnimateDetail(NPCs, var, index=0, width=8, directory="", name=None, ext=".gif"):
-    """
-    Input:
-        - NPCs
-        - var
-        - index
-        - name: None or string. Output will be saved if name is string. Default None
-        - ext: ".gif" or ".mp4", default ".gif"
+def AnimateDetail(NPCs, var, index:int=0, width=8, directory="", name=None, ext=".gif"):
+    """ Animate an individual structure 
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param var: Dictionary of simulation parameters
+    :param index: Index of structure to be animated, default 0. 0-indexed 
+    :param width: Width of animation plot 
+    :param directory: directory to save animation in 
+    :param name: name of animation. No file will be saved if None. Defaults to None 
+    :param ext: File extension, ".gif" or ".mp4", defaults to ".gif"
     """
     AnimatedScatter(
         NPCs["NPCs"][index],
@@ -876,7 +873,7 @@ def AnimateDetail(NPCs, var, index=0, width=8, directory="", name=None, ext=".gi
 
 
 class AnimatedScatter(object):
-    """An animated scatter plot using matplotlib.animations.FuncAnimation."""
+
 
     def __init__(
         self,
@@ -892,6 +889,7 @@ class AnimatedScatter(object):
         name,
         ext,
     ):
+        """An animated scatter plot using matplotlib.animations.FuncAnimation."""
         self.solution = solution
         self.nRings = len(solution)
         self.anchors = np.zeros(3)  # anchors
@@ -1088,6 +1086,15 @@ if __name__ == "__main__":
 def AnimateOverview(
     NPCs, offsetNPCs, var, width=8, directory="", name=None, ext=".gif"
 ):
+    """An animated scatter plot using matplotlib.animations.FuncAnimation.
+    :param NPCs: Dictionary containing simulated NPCs and their metadata
+    :param offsetNPCs: NPC coordinates arranged on a grid 
+    :param var: Dictionary of simulation parameters
+    :param width: width of animation plot 
+    :param directory: directory to save animation in, defaults to "". 
+    :param name: name of animation. No file will be saved if None. Defaults to None 
+    :param ext: File extension, ".gif" or ".mp4", defaults to ".gif"
+    """
     AnimateAll(
         NPCs["NPCs"],
         offsetNPCs,
@@ -1102,8 +1109,6 @@ def AnimateOverview(
 
 
 class AnimateAll(object):
-    """An animated scatter plot using matplotlib.animations.FuncAnimation."""
-
     def __init__(
         self, NPCs, offsetNPCs, forcecoords, symmet, r, width, directory, name, ext
     ):
@@ -1279,6 +1284,20 @@ class gethistdata:
     def __init__(
         self, var, NPCs, featuresAll, featuresElAll, featuresel3DAll, width=5, bins=None
     ):
+        """
+        Plots the distribution of different features for all NPCs. Features are 
+        NPC radius, minor/major axis ratio of an ellipse, residual sum of squares of a ring-wise fitted ellipse, 
+        difference in tilt in radians between the nucleoplasmic and cytoplasmic rings, determined using ellipses to the respective subcomplexes. 
+        shift of nucleoplasmic and cytoplasmic ring, determined using ellipses fitted to the respective subcomplexes. 
+        Distance between the centroid of the nucleoplasmic and cytoplasmic ring, determined using ellipses fitted to the respective subcomplexes. 
+        :param var: Dictionary of simulation parameters
+        :param NPCs: Dictionary containing simulated NPCs and their metadata
+        :param featuresAll: features of the NPC determined by fitting circles. From Analyse_deformed.meanfeaturesC()
+        :param featuresElAll: features of the NPC determined by fitting ellipses. From Analyse_deformed.meanfeaturesE()
+        :param featuresel3DAll: centre and tilt of NPC subcomplexes determined by fitting ellipses. from exportCSV.colfeaturesEl3D. 
+        :param width: Width of plot, defaults to 5 
+        :param bins: Number of bins to be plotted. If None, the number of bins will be automatically determined. Defaults to None
+        """
         self.width = width
         self.bins = bins
         # featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)

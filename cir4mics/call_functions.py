@@ -15,7 +15,7 @@ import Analyse_deformed
 
 # import numpy as np
 
-export = False  # set to True to export data
+export = True  # set to True to export data
 
 data_dir = "./data/"  # Directory for output files
 
@@ -91,15 +91,12 @@ circle_allrings = Analyse_deformed.circles(NPCscoords, membership=NPCs["z_i_all"
 circle_CRNR = Analyse_deformed.circles(NPCscoords, membership=NPCs["ringmemall"])
 
 # Compute further features
-featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)  # Circle features
+featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings) # featuresAll: r, sqsum, residual, zsqsum of circle per NPC
 featuresElAll = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
-_, _, _, _, featuresel3DAll = exportCSV.col_features(NPCs, circle_CRNR, ellipse_CRNR)
-
-# featuresAll: r, sqsum, residual, zsqsum of circle per NPC
-# featuresel3DAll: centre subcomplex, 1 centre subcomplex 2, centre subcomplex n, tilt subcomplex 1, tilt subcomplex 2 ...
+featuresel3DAll = exportCSV.colfeaturesEl3D(NPCs, ellipse_CRNR) # featuresel3DAll: centre subcomplex, 1 centre subcomplex 2, centre subcomplex n, tilt subcomplex 1, tilt subcomplex 2 ...
 
 ## Show histogram of features
-# NPC_plotting.gethistdata(var, NPCs, featuresAll, featuresElAll, featuresel3DAll, width = 5, bins = None)
+NPC_plotting.gethistdata(var, NPCs, featuresAll, featuresElAll, featuresel3DAll, width = 5, bins = None)
 
 #### Export data
 ## All NPC coordinates and metadata

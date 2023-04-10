@@ -38,19 +38,19 @@ def getNPCs(var):
 
 def getOffsetNPCs(NPCcoords, offset=None, offsetmult=None, justoffset:bool = False):
     """Arrange NPCs on a grid by offsetting them in x and y direction
-    input:
-        NPCcoords: Coordinates of NPC, non-offset
-        offset: distance by which each NPC should be offset. Automatically determined if not provided
-        offsetmult: multiplier of offset. Default 1.25
-    output:
-        NPCoffset: Offset coordinates"""
+    :param NPCcoords: Coordinates of NPC, non-offset
+    :param offset: distance by which each NPC should be offset. Automatically determined if not provided
+    :param offsetmult: multiplier of offset. Default 1.25
+    :param justoffset: Only returns offset in nm if True. Default False 
+    :returns:
+        offsetNPCs: Offset coordinates"""
 
     offsetmult = 1 if not offsetmult else offsetmult
     offset = offsetmult * np.max(np.abs(NPCcoords[:, :2])) if not offset else offset
   
     if not justoffset:  
         n = int(NPCcoords[-1, 4] + 1)  # number of NPCs
-        NPCoffset = np.copy(NPCcoords)
+        offsetNPCs = np.copy(NPCcoords)
 
 
         # Determine the number of rows and columns needed. The last cells on the grid might stay empty
@@ -64,16 +64,16 @@ def getOffsetNPCs(NPCcoords, offset=None, offsetmult=None, justoffset:bool = Fal
         for row in range(ncols):
             for col in range(nrows):
                 if i < n:
-                    NPCoffset[np.where(NPCoffset[:, 4] == i), y] += col * 3 * offset
-                    NPCoffset[np.where(NPCoffset[:, 4] == i), x] += row * 3 * offset
+                    offsetNPCs[np.where(offsetNPCs[:, 4] == i), y] += col * 3 * offset
+                    offsetNPCs[np.where(offsetNPCs[:, 4] == i), x] += row * 3 * offset
                     i += 1
     
-        return NPCoffset
+        return offsetNPCs
     return offset
 
 
 def getNPCcoords(NPCs, var, offset:bool=False, offsetmult = 1, justoffset:bool = False):
-    """
+    """Generates coordinates of all NPCs with NPCs and nups indexed. 
     :param NPCs: Dictionary containing simulated NPCs and their metadata
     :param var: Dictionary of simulation parameters
     :param offset: NPCs are arranged on a grid if True. Offset can be applied as 
