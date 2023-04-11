@@ -1,5 +1,5 @@
 # CIR4MICS: **c**onfigurable **i**rregular **r**ings **for** **mic**roscopy **s**imulations 
-CIR4MICS ("ciramics") is a pipeline that creates artificial datasets of rotationally symmetric structures. 
+CIR4MICS ("ceramics") is a pipeline that creates artificial datasets of rotationally symmetric structures. 
 Out of the box, it generates structurally variable synthetic Nuclear Pore Complexes (NPCs) based on architectural models of the true NPC. 
 Users can select one or more N- or C-terminally tagged NPC proteins, and simulate a wide range of geometric variations. 
 Rotationally symmetric structures such as the NPC are also represented as a spring-model such that arbitrary deforming forces, 
