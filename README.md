@@ -40,7 +40,7 @@ Dependencies are installed according to pyproject.toml and poetry.lock
 ### Run the tutorial 
 `jupyter-lab cir4mics/NPC_testlab.ipynb`
 
-Everything is properly configured if the tutorial runs to the end.  
+The tutorial runs to the end if everything is properly configured.  
 The tutorial can be modified for any specific task.  
 
 ### Run minimal script 
@@ -54,8 +54,22 @@ If you are already aware of what's in call_functions.py, and if it doesn't requi
 `poetry run python cir4mics/call_functions.py`  
 
 
-### To exit poetry shell 
+### To exit the poetry shell 
 `exit` 
+
+
+## Tutorials 
+### Simulating NPCs 
+`jupyter-lab cir4mics/NPC_testlab.ipynb`
+
+### Including new models into the simulator 
+`jupyter-lab cir4mics/Include_models.ipynb`
+
+### Dynamics 
+Dynamics do not reflect true NPC dynamics, but might be useful when hard to predict dynamics are of interest 
+
+`jupyter-lab cir4mics/Dynamics.ipynb` 
+
 
 ## Troubleshoothing 
 
@@ -81,18 +95,6 @@ Windows: Powershell upon running `poetry shell` returns `Virtual environment alr
 Solution: Restart the computer 
 See: https://visualstudio.microsoft.com/visual-cpp-build-tools/ 
 
-
-## Tutorials 
-### Simulating NPCs: 
-`jupyter-lab cir4mics/NPC_testlab.ipynb`
-
-### Including new models into the simulator 
-`jupyter-lab cir4mics/Include_models.ipynb`
-
-### Dynamics 
-Dynamics do not reflect true NPC dynamics, but might be useful when hard to predict dynamics are of interest 
-
-`jupyter-lab cir4mics/Dynamics.ipynb` 
 
 ## Contact 
 theiss@ebi.ac.uk 
