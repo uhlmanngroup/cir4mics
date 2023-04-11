@@ -40,7 +40,7 @@ Create or start a virtual environment. Packages installed here will be isolated 
 `poetry shell`  
 The name of the virtual environment should now be indicated in round brackets to the left of the command line prompt. 
 
-### Install dependencies 
+### Install the dependencies 
 Dependencies are installed according to pyproject.toml and poetry.lock  
 `poetry install`  
 
@@ -50,7 +50,7 @@ Dependencies are installed according to pyproject.toml and poetry.lock
 The tutorial runs to the end if everything is properly configured.  
 The tutorial can be modified for any specific task.  
 
-### Run minimal script 
+### Run a minimal script 
 
 - Start an IDE of your choice 
 - Load cir4mics/cir4mics/call_functions.py
@@ -67,13 +67,13 @@ If you are already aware of what's in call_functions.py, and if it doesn't requi
 
 ## Tutorials 
 Run from within the poetry shell and the right working directory (see above).  
-### Simulating NPCs 
+### How to simulate NPCs 
 `jupyter-lab cir4mics/NPC_testlab.ipynb`
 
 ### How to include new models to the simulator 
 `jupyter-lab cir4mics/Include_models.ipynb`
 
-### Simulate temporal dynamics 
+### How to simulate temporal dynamics 
 Dynamics do not reflect true NPC dynamics, but might be useful when hard to predict dynamics are of interest 
 
 `jupyter-lab cir4mics/Dynamics.ipynb` 
