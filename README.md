@@ -21,7 +21,7 @@ Alternatively use Windows Subsystem for Linux (WSL).
 Open a terminal of choice  
 Clone this repository:  
 Tip: Copy/paste commands to avoid typos  
-`git clone https://github.com/MariaTheiss/cir4mics.git`  
+`git clone https://github.com/uhlmanngroup/cir4mics.git`  
 
 Change to the directory folder:  
 `cd cir4mics`  
