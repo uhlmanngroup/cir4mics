@@ -4,7 +4,7 @@ version = "0.1.1"
 description = "Simulating structurally variable NPCs or other ring-like structures for Microscopy"
 authors = ["MariaTheiss <theiss@ebi.ac.uk>"]
 license = "MIT"
-readme = "README.md"
+readme = "READMEpypi.md"
 packages = [{include = "cir4mics"}]
 
 [tool.poetry.dependencies]
