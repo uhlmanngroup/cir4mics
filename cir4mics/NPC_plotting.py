@@ -26,7 +26,7 @@ from scipy.stats import norm
 import copy
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from IPython.display import HTML
-import NPC
+import npc
 
 Pos3D = DeformNPC.Pos3D
 Sol3D = DeformNPC.Sol3D
@@ -136,8 +136,8 @@ class plotOverview:
         ax.spines["left"].set_visible(False)
 
         if showforces == True:
-            offset = NPC.getNPCcoords(self.NPCs, self.var, justoffset = True)
-            forceoffset = NPC.getOffsetNPCs(forcecoords, offset = offset)
+            offset = npc.getNPCcoords(self.NPCs, self.var, justoffset = True)
+            forceoffset = npc.getOffsetNPCs(forcecoords, offset = offset)
             ax.scatter(
                 forceoffset[:, 0], forceoffset[:, 1], c="blue", s=2 * markersize, marker = "x"
             )
