@@ -39,6 +39,7 @@ From the same directory as before
 Create or start a virtual environment. Packages installed here will be isolated from the rest of the system, avoiding unfavourable crosstalk.  
 `poetry shell`  
 The name of the virtual environment should now be indicated in round brackets to the left of the command line prompt. 
+If there are issues with this, try first restarting the terminal and then closing any existing environments, such as conda environments.  
 
 ### Install the dependencies 
 Dependencies are installed according to pyproject.toml and poetry.lock  
