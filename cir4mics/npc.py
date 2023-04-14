@@ -6,7 +6,7 @@ Created on Wed Mar  8 11:25:03 2023
 @author: maria
 """
 import yaml
-import DeformNPC
+from cir4mics import DeformNPC
 import numpy as np
 import math
 
