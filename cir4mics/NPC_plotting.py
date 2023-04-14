@@ -13,8 +13,9 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection
 import seaborn as sns
 from warnings import warn
 import matplotlib.animation as animation
-import DeformNPC
-import Analyse_deformed
+from cir4mics import DeformNPC
+from cir4mics import Analyse_deformed
+from cir4mics import npc
 from copy import deepcopy
 import matplotlib.cm as cm
 import matplotlib.colors as colors
@@ -26,7 +27,6 @@ from scipy.stats import norm
 import copy
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 from IPython.display import HTML
-import npc
 
 Pos3D = DeformNPC.Pos3D
 Sol3D = DeformNPC.Sol3D
@@ -1183,10 +1183,10 @@ class AnimateAll(object):
         xy0 = []
 
         xy = []
-        for npc in range(self.n):
+        for npci in range(self.n):
             for ring in range(self.nRings):
                 xy0.append(
-                    Pos3D(NPCsCopy[npc][ring])
+                    Pos3D(NPCsCopy[npci][ring])
                 )  # [:, np.append(np.arange(self.symmet), 0)])
 
         for frame in range(self.tmax):

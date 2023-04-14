@@ -14,9 +14,9 @@ from warnings import warn
 from sklearn.gaussian_process.kernels import RBF
 import random
 import sys
-from Nups_Info import SelectNup
+from cir4mics.Nups_Info import SelectNup
+from cir4mics import Analyse_deformed
 from numba import njit
-import Analyse_deformed
 import math
 
 np.seterr(
