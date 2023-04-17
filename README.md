@@ -68,19 +68,19 @@ If you are already aware of what's in call_functions.py (See Tutorials)
 ## Tutorials 
 Run from within the poetry shell and the right working directory (see above).  
 ### How to simulate NPCs 
-`jupyter-lab cir4mics/NPC_testlab.ipynb`
+`jupyter-lab notebooks/NPC_testlab.ipynb`
 
 #### Run a minimal script  
 - Start an IDE of your choice 
 - Load cir4mics/cir4mics/call_functions.py
 
 ### How to include new models to the simulator 
-`jupyter-lab cir4mics/Include_models.ipynb`
+`jupyter-lab notebooks/Include_models.ipynb`
 
 ### How to simulate temporal dynamics 
 Dynamics do not reflect true NPC dynamics, but might be useful when hard to predict dynamics are of interest 
 
-`jupyter-lab cir4mics/Dynamics.ipynb` 
+`jupyter-lab notebooks/Dynamics.ipynb` 
 
 
 ## Troubleshoothing (Installation via Option B)
