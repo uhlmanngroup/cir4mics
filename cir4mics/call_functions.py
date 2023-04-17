@@ -7,10 +7,7 @@ Created on Fri Feb 17 13:30:07 2023
 """
 #### Simulating structurally variable NPCs for microscpy ####
 ###
-from cir4mics import exportCSV
-from cir4mics import npc
-from cir4mics import NPC_plotting
-from cir4mics import Analyse_deformed
+from cir4mics import exportCSV, npc, NPC_plotting, Analyse_deformed
 #import utility
 
 # import numpy as np
@@ -19,7 +16,7 @@ export = True  # set to True to export data
 
 data_dir = "./data/"  # Directory for output files
 
-config = "config.yaml"
+config = "../configs/config.yaml"
 var = npc.getVars(config)  # Transform config file into a python dictionary
 
 #### Adjust simulation parameters
