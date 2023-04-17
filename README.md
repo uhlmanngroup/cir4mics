@@ -72,7 +72,7 @@ Run from within the poetry shell and the right working directory (see above).
 
 #### Run a minimal script  
 - Start an IDE of your choice 
-- Load cir4mics/cir4mics/call_functions.py
+- Load cir4mics/scripts/call_functions.py
 
 ### How to include new models to the simulator 
 `jupyter-lab notebooks/Include_models.ipynb`
