@@ -6,7 +6,7 @@ Rotationally symmetric structures such as the NPC are also represented as a spri
 of user-defined magnitudes, simulate irregularly shaped variations. 
 
 ## Requirements    
-- python, pip, git
+- python, pip, git, jupyter-lab
 https://pip.pypa.io/en/stable/installation/ 
 
 ### Linux, macOS
