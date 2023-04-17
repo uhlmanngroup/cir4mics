@@ -5,8 +5,10 @@ Users can select one or more N- or C-terminally tagged NPC proteins, and simulat
 Rotationally symmetric structures such as the NPC are also represented as a spring-model such that arbitrary deforming forces, 
 of user-defined magnitudes, simulate irregularly shaped variations. 
 
+
+
 ## Requirements    
-- python, pip, git
+- python, pip, git, jupyter-lab
 https://pip.pypa.io/en/stable/installation/ 
 
 ### Linux, macOS
@@ -26,43 +28,43 @@ Tip: Copy/paste commands to avoid typos
 Change to the directory folder:  
 `cd cir4mics`  
 
-### Install poetry 
+### Option A: Installation from pypi 
+`pip install cir4mics` 
+
+
+### Option B: Installation from Github 
+Skip to "Tutorials" if Installation via Option A was successfull  
+
+#### Install poetry 
 `pip install poetry`
 
 or following: 
 https://python-poetry.org/docs/ 
 
-## Usage
+#### Usage
 From the same directory as before 
 
-### Open a poetry shell
+#### Open a poetry shell
 Create or start a virtual environment. Packages installed here will be isolated from the rest of the system, avoiding unfavourable crosstalk.  
 `poetry shell`  
 The name of the virtual environment should now be indicated in round brackets to the left of the command line prompt. 
 If there are issues with this, try first restarting the terminal and then closing any existing environments, such as conda environments.  
 
-### Install the dependencies 
+#### Install the dependencies 
 Dependencies are installed according to pyproject.toml and poetry.lock  
 `poetry install`  
 
-### Run the tutorial 
-`jupyter-lab cir4mics/NPC_testlab.ipynb`
-
-The tutorial runs to the end if everything is properly configured.  
-The tutorial can be modified for any specific task.  
-
-### Run a minimal script 
+#### Run a minimal script 
 
 - Start an IDE of your choice 
 - Load cir4mics/cir4mics/call_functions.py
 
-### Run without IDE 
+#### Run without IDE 
 If you are already aware of what's in call_functions.py, and if it doesn't require modification.  
 
 `poetry run python cir4mics/call_functions.py`  
 
-
-### To exit the poetry shell 
+#### To exit the poetry shell 
 `exit` 
 
 
@@ -80,8 +82,7 @@ Dynamics do not reflect true NPC dynamics, but might be useful when hard to pred
 `jupyter-lab cir4mics/Dynamics.ipynb` 
 
 
-## Troubleshoothing 
-
+## Troubleshoothing (Installation via Option B)
 Windows: Git Bash struggles to open poetry shell  
 Solution: Use Powershell, cmd.exe, or WSL  
 see: https://github.com/python-poetry/poetry/issues/6495  
