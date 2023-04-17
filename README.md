@@ -54,13 +54,10 @@ If there are issues with this, try first restarting the terminal and then closin
 Dependencies are installed according to pyproject.toml and poetry.lock  
 `poetry install`  
 
-#### Run a minimal script 
 
-- Start an IDE of your choice 
-- Load cir4mics/cir4mics/call_functions.py
 
 #### Run without IDE 
-If you are already aware of what's in call_functions.py, and if it doesn't require modification.  
+If you are already aware of what's in call_functions.py (See Tutorials)
 
 `poetry run python cir4mics/call_functions.py`  
 
@@ -72,6 +69,10 @@ If you are already aware of what's in call_functions.py, and if it doesn't requi
 Run from within the poetry shell and the right working directory (see above).  
 ### How to simulate NPCs 
 `jupyter-lab cir4mics/NPC_testlab.ipynb`
+
+#### Run a minimal script  
+- Start an IDE of your choice 
+- Load cir4mics/cir4mics/call_functions.py
 
 ### How to include new models to the simulator 
 `jupyter-lab cir4mics/Include_models.ipynb`
