@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cir4mics"
-version = "0.2.5"
+version = "0.2.6"
 description = "Simulating structurally variable NPCs or other ring-like structures for Microscopy"
 authors = ["MariaTheiss <theiss@ebi.ac.uk>"]
 license = "MIT"
@@ -23,7 +23,6 @@ gemmi = "^0.6.0"
 [tool.poetry.group.dev.dependencies]
 spyder = "^5.4.2"
 black = "^23.3.0"
-jupyterlab = "^3.6.1"
 
 [build-system]
 requires = ["poetry-core"]
