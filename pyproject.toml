@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cir4mics"
-version = "0.2.4"
+version = "0.2.5"
 description = "Simulating structurally variable NPCs or other ring-like structures for Microscopy"
 authors = ["MariaTheiss <theiss@ebi.ac.uk>"]
 license = "MIT"
