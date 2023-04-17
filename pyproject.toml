@@ -16,7 +16,6 @@ scikit-learn = "^1.2.2"
 numba = "^0.56.4"
 seaborn = "^0.12.2"
 sympy = "^1.11.1"
-jupyterlab = "^3.6.1"
 ipympl = "^0.9.3"
 gemmi = "^0.6.0"
 
@@ -24,6 +23,7 @@ gemmi = "^0.6.0"
 [tool.poetry.group.dev.dependencies]
 spyder = "^5.4.2"
 black = "^23.3.0"
+jupyterlab = "^3.6.1"
 
 [build-system]
 requires = ["poetry-core"]
