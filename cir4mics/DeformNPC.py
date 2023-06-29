@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -581,7 +583,7 @@ def MultipleNPC(
         newminTheta = None  # updated twist angle. No twist angle if all nups lie on the same z-plane
     else:
         ringAnglesExp, _ = Change_rotang(
-            ringAnglesOld, thetaold, thetaoffset, zold, thetanew
+            ringAnglesOld, thetaold, thetaoffset, zold, ringMember, thetanew
         )
 
     # Modification 1 here
@@ -607,6 +609,7 @@ def MultipleNPC(
                 thetaold,
                 thetaoffset,
                 zold,
+                ringMember,
                 thetanew,
                 thetasigma,
                 seeds[i],
@@ -619,7 +622,7 @@ def MultipleNPC(
         # elif i in basis + 5:
         #    r = Change_radius(rold,  rnew, rvar["rsigma"], seeds[i])
         # elif i in basis + 3:
-        #    ringAngles, newminTheta = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, thetanew, thetavar["thetasigma"], seeds[i])
+        #    ringAngles, newminTheta = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, ringMember, thetanew, thetavar["thetasigma"], seeds[i])
         # elif i in basis + 2:
         #    elliptical = Change_ellipt(elliptnew, elliptvar["elliptsigma"], seeds[i])
 
@@ -747,6 +750,7 @@ def Change_rotang(
     thetaold,
     thetaoffset,
     zold,
+    ringMember,
     thetanew=False,
     thetasigma=False,
     seed=None,
@@ -762,13 +766,25 @@ def Change_rotang(
         thetanew = np.random.normal(thetanew, thetasigma)
 
     thetadif = thetaold - thetanew
-    ringAngles[zold > midplane] += thetadif / 2
-    ringAngles[zold <= midplane] -= thetadif / 2
 
-    NRmean = np.mean(ringAngles[zold <= midplane])
-    CRmean = np.mean(ringAngles[zold > midplane])
+    #get average z-position ("hight") of subcomplexes
+    uniqueSub= np.unique(ringMember) # unique array of subcomplexes
+    h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
 
-    newminTheta = NRmean - CRmean - thetaoffset
+    hmax = np.max(h)
+    hmin = np.min(h)
+
+    for memberof, i in zip(uniqueSub, range(len(uniqueSub))):
+        hnorm = (h[i] - hmin)/(hmax - hmin)
+        gamma = 2 * np.arcsin(hnorm * np.sin(0.5 * thetadif))
+        ringAngles[ringMember==[memberof]] += gamma
+
+    ringAngles -= thetadif/2
+
+    Cangle = np.mean(ringAngles[ringMember == ringMember[np.argmax(zold)]]) # C angle
+    Nangle = np.mean(ringAngles[ringMember == ringMember[np.argmin(zold)]]) # N angle
+
+    newminTheta = Nangle - Cangle - thetaoffset
 
     return ringAngles, newminTheta
 

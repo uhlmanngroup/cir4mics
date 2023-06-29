@@ -79,6 +79,16 @@ class SelectNup:
 
                     ref = np.array([auth])
 
+        if model == "TESTANGLE":
+            auth = np.array([1196.307, 578.280, 550])
+            auth1 = np.array([1196.307, 578.280, 530])
+            auth2 = np.array([1196.307, 578.280, 400])
+            auth3 = np.array([1196.307, 578.280, 275])
+            auth4 = np.array([1196.307, 578.280, 150])
+            auth5 = np.array([1196.307, 578.280, 50])
+            auth6 = np.array([1196.307, 578.280, 0])
+            ref = np.array([auth, auth1, auth2, auth3, auth4, auth5, auth6])
+
         if model == "OTHER":  # Simple model for implementation purposes
             if type(nup) == tuple:
                 if type(term) == tuple:
@@ -1625,7 +1635,7 @@ class SelectNup:
         if model == "5A9Q":
             c = np.array([711.36, 711.36])  # central axis
 
-        if model == "SIMPLE":
+        if model == "SIMPLE" or model == "TESTANGLE":
             c = np.array([711.36, 711.36])  # central axis
 
         if model == "OTHER" or model == "SMILE":
@@ -1666,6 +1676,9 @@ class SelectNup:
 
         if model == "SIMPLE" or model == "OTHER" or model == "SMILE":
             return ["IR" for i in range(len(ref))]
+
+        if model == "TESTANGLE":
+            return ["CR", "CR", "BRCR", "IR", "BRNR", "NR", "NR"]
 
         if model == "7PER" or model == "5IJN" or model == "5IJO":
             if nup != "NUP155":
