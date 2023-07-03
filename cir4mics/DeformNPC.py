@@ -586,8 +586,12 @@ def MultipleNPC(
         ringAnglesExp = ringAnglesOld
         newminTheta = None  # updated twist angle. No twist angle if all nups lie on the same z-plane
     else:
-        ringAnglesExp, _ = Change_rotang(
-            ringAnglesOld, thetaold, thetaoffset, zold, ringMember, thetanew
+        if rel:
+            ringAnglesExp, _ = Change_rotang_rel( ringAnglesOld, thetaold, thetaoffset, zold, ringMember, nup_i, refNup, thetanew)
+
+        else:
+            ringAnglesExp, _ = Change_rotang(
+                ringAnglesOld, thetaold, thetaoffset, zold, ringMember, thetanew
         )
 
     # Modification 1 here
@@ -742,10 +746,10 @@ def Change_dist(zold, ringMember, dnew=False, dsigma=False, seed=None):
 
 def Change_dist_rel(zold, ringMember, nup_i, refNup, dnew=False, dsigma=False, seed=None):
     z = np.array(zold)
-    refNupFilter = nup_i == refNup.nupindex[0] #true if Nup is reference nup
+
     uniqueSub = np.unique(ringMember) # unique array of subcomplexes
     uniqueSubref = np.unique(refNup.ringmember) # unique array of reference nup subcomplexes
-    zfilter = np.logical_and(refNupFilter, np.isin(ringMember, uniqueSubref)) #True for each ref Nup that shares a subcomplex with a non-ref nup
+    zfilter = np.logical_and(nup_i == refNup.nupindex[0], np.isin(ringMember, uniqueSubref)) #True for each ref Nup that shares a subcomplex with a non-ref nup
 
 
     h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
@@ -755,9 +759,9 @@ def Change_dist_rel(zold, ringMember, nup_i, refNup, dnew=False, dsigma=False, s
 
     intersect = np.intersect1d(uniqueSubref, uniqueSub) # Subcomplexes that contain both ref and non-ref nups
 
-
+    h = np.array(h)
     for memberof in intersect: # replace values in h for their counterparts in href
-        np.array(h)[uniqueSub== memberof] = np.array(href)[uniqueSubref == memberof]
+        h[uniqueSub== memberof] = np.array(href)[uniqueSubref == memberof]
 
     h = list(h)
 
@@ -784,6 +788,7 @@ def Change_dist_rel(zold, ringMember, nup_i, refNup, dnew=False, dsigma=False, s
 
     return z
 
+
 def Change_rotang(
     ringAnglesOld,
     thetaold,
@@ -794,7 +799,6 @@ def Change_rotang(
     thetasigma=False,
     seed=None,
 ):
-    midplane = np.mean(zold)
     ringAngles = np.array(ringAnglesOld)
 
     if not (str(thetanew) == "0" or str(thetanew) == "0.0"):
@@ -827,6 +831,67 @@ def Change_rotang(
 
     return ringAngles, newminTheta
 
+
+def Change_rotang_rel(
+    ringAnglesOld,
+    thetaold,
+    thetaoffset,
+    zold,
+    ringMember,
+    nup_i,
+    refNup,
+    thetanew=False,
+    thetasigma=False,
+    seed=None,
+):
+    ringAngles = np.array(ringAnglesOld)
+
+    if not (str(thetanew) == "0" or str(thetanew) == "0.0"):
+        thetanew = thetanew if thetanew else thetaold
+
+    if thetasigma:
+        np.random.seed(seed)
+        thetanew = np.random.normal(thetanew, thetasigma)
+
+    thetadif = thetaold - thetanew
+
+    uniqueSub= np.unique(ringMember) # unique array of subcomplexes
+    uniqueSubref = np.unique(refNup.ringmember) # unique array of reference nup subcomplexes
+
+    zfilter = np.logical_and(nup_i == refNup.nupindex[0], np.isin(ringMember, uniqueSubref)) #True for each ref Nup that shares a subcomplex with a non-ref nup
+
+    #get average z-position ("height") of subcomplexes
+    h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
+
+    href = [np.mean(zold[[a & b for (a,b) in zip(ringMember == [memberof], list(zfilter))]])
+            for memberof in uniqueSubref] #
+
+
+    intersect = np.intersect1d(uniqueSubref, uniqueSub) # Subcomplexes that contain both ref and non-ref nups
+
+    h = np.array(h)
+
+    for memberof in intersect: # replace values in h for their counterparts in href
+        h[uniqueSub == memberof] = np.array(href)[uniqueSubref == memberof]
+
+    h = list(h)
+
+    hmax = np.max(href)
+    hmin = np.min(href)
+
+    for memberof, i in zip(uniqueSub, range(len(uniqueSub))):
+        hnorm = (h[i] - hmin)/(hmax - hmin)
+        gamma = 2 * np.arcsin(hnorm * np.sin(0.5 * thetadif))
+        ringAngles[ringMember==[memberof]] += gamma
+
+    ringAngles -= thetadif/2
+
+    Cangle = np.mean(ringAngles[ringMember == ringMember[np.argmax(zold)]]) # C angle
+    Nangle = np.mean(ringAngles[ringMember == ringMember[np.argmin(zold)]]) # N angle
+
+    newminTheta = Nangle - Cangle - thetaoffset
+
+    return ringAngles, newminTheta
 
 def Change_ellipt(elliptnew=False, elliptsigma=False, seed=None):
     elliptnew = elliptnew if elliptnew else 1.0
