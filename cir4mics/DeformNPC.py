@@ -547,13 +547,14 @@ def MultipleNPC(
         if rnew != None:
             rnew *= np.mean(rold) / np.mean(refNup.r)
 
-        if dnew != None:
-            zref = refNup.z
-            midplaneold = np.mean(zold)
-            midplaneref = np.mean(zref)
-            dabs = np.mean(zold[zold > midplaneold]) - np.mean(zold[zold < midplaneold])
-            drel = np.mean(zref[zref > midplaneref]) - np.mean(zref[zref < midplaneref])
-            dnew += dabs - drel
+        # if dnew != None:
+        #     zoldref = zold[nup_i == 0]
+        #     href = [np.mean(zoldref[refNup.ringmember == [memberof]]) for memberof in np.unique(refNup.ringmember)]
+        #     habs = [np.mean(zold[ringMember == [memberof]]) for memberof in np.unique(ringMember)]
+        #
+        #     drel = np.max(href) - np.min(href)
+        #     dabs = np.max(habs) - np.min(habs)
+        #     dnew += dabs - drel
 
     ringAnglesOld = np.array(ringAngles)
 
@@ -574,7 +575,10 @@ def MultipleNPC(
 
     # expected values: pretends no standard deviation is applied, to export as metadata
     rexp = Change_radius(rold, rnew)  # rsigma, etc, False if not specified
-    zexp = Change_dist(zold, dnew)
+    if rel:
+        zexp = Change_dist_rel(zold, ringMember, nup_i, refNup, dnew)
+    else:
+        zexp = Change_dist(zold, ringMember, dnew)
 
     if math.isnan(
         thetaold
@@ -603,7 +607,10 @@ def MultipleNPC(
         nup_is.append(nup_i)
         r = Change_radius(rold, rnew, rsigma, seeds[i])
         if not math.isnan(thetaold):  # If Nups lie on different z-planes
-            z = Change_dist(zold, dnew, dsigma, seeds[i])
+            if not rel:
+                z = Change_dist(zold, ringMember, dnew, dsigma, seeds[i])
+            else:
+                z = Change_dist_rel(zold, ringMember, nup_i, refNup, dnew, dsigma, seeds[i])
             ringAngles, newminTheta = Change_rotang(
                 ringAnglesOld,
                 thetaold,
@@ -614,26 +621,9 @@ def MultipleNPC(
                 thetasigma,
                 seeds[i],
             )
+
         elliptical = Change_ellipt(elliptnew, elliptsigma, seeds[i])
 
-        # Modification 2 here
-        # if i in basis + 6:
-        #    z = Change_dist(zold, dnew, dvar["dsigma"], seeds[i])
-        # elif i in basis + 5:
-        #    r = Change_radius(rold,  rnew, rvar["rsigma"], seeds[i])
-        # elif i in basis + 3:
-        #    ringAngles, newminTheta = Change_rotang(ringAnglesOld, thetaold, thetaoffset, zold, ringMember, thetanew, thetavar["thetasigma"], seeds[i])
-        # elif i in basis + 2:
-        #    elliptical = Change_ellipt(elliptnew, elliptvar["elliptsigma"], seeds[i])
-
-        # mag = mags[i]
-        # zmag = mag/2
-        ######
-
-        # deform NPC
-        # (self r, ringAngles, z, symmet = 8, elliptical = False,
-        #  mag = 0, zmag = 0, sigmamult = 0.5, nConnect = 2, damp = 1,
-        #  kr = 0.7, tlast = 20, step = 0.25, seed = None):
 
         deformNPC_temp = DeformNPC(
             r,
@@ -725,25 +715,74 @@ def Change_radius(r, rnew=False, rsigma=False, seed=None):
     return (rmean / np.mean(r)) * r
 
 
-def Change_dist(zold, dnew=False, dsigma=False, seed=None):
+def Change_dist(zold, ringMember, dnew=False, dsigma=False, seed=None):
     z = np.array(zold)
+    uniqueSub= np.unique(ringMember) # unique array of subcomplexes
+    h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
 
-    midplane = np.mean(z)
-    dist = np.mean(z[z > midplane]) - np.mean(z[z <= midplane])
+    hmax = np.max(h)
+    hmin = np.min(h)
 
     if not (str(dnew) == "0" or str(dnew) == "0.0"):
-        dnew = dnew if dnew else dist
+        dnew = dnew if dnew else hmax-hmin
 
     if dsigma:
         np.random.seed(seed)
         dnew = np.random.normal(dnew, dsigma)
 
-    ddif = dist - dnew
+    # new average z positions of all sub-complexes
+    hnew = [((i - hmin)/(hmax-hmin)) * dnew + hmin for i in h]
 
-    z[z > midplane] = z[z > midplane] - ddif
+    hdif = [h[i] - hnew[i] for i in range(len(h))]
+
+    for sub in uniqueSub:
+        z[ringMember==sub]-=np.array(hdif)[uniqueSub==sub]
 
     return z
 
+def Change_dist_rel(zold, ringMember, nup_i, refNup, dnew=False, dsigma=False, seed=None):
+    z = np.array(zold)
+    refNupFilter = nup_i == refNup.nupindex[0] #true if Nup is reference nup
+    uniqueSub = np.unique(ringMember) # unique array of subcomplexes
+    uniqueSubref = np.unique(refNup.ringmember) # unique array of reference nup subcomplexes
+    zfilter = np.logical_and(refNupFilter, np.isin(ringMember, uniqueSubref)) #True for each ref Nup that shares a subcomplex with a non-ref nup
+
+
+    h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
+
+    href = [np.mean(zold[[a & b for (a,b) in zip(ringMember == [memberof], list(zfilter))]])
+            for memberof in uniqueSubref] #
+
+    intersect = np.intersect1d(uniqueSubref, uniqueSub) # Subcomplexes that contain both ref and non-ref nups
+
+
+    for memberof in intersect: # replace values in h for their counterparts in href
+        np.array(h)[uniqueSub== memberof] = np.array(href)[uniqueSubref == memberof]
+
+    h = list(h)
+
+    hmax = np.max(href)
+    hmin = np.min(href)
+
+
+    if not (str(dnew) == "0" or str(dnew) == "0.0"):
+        dnew = dnew if dnew else hmax-hmin
+
+    if dsigma:
+        np.random.seed(seed)
+        dnew = np.random.normal(dnew, dsigma)
+
+    # new average z positions of all sub-complexes
+    hnew = [((i - hmin)/(hmax-hmin)) * dnew + hmin for i in h]
+
+    hdif = [h[i] - hnew[i] for i in range(len(h))]
+
+    for sub in uniqueSub:
+        z[ringMember==sub]-=np.array(hdif)[uniqueSub==sub]
+
+    z -= np.min(z[zfilter])
+
+    return z
 
 def Change_rotang(
     ringAnglesOld,
@@ -767,7 +806,7 @@ def Change_rotang(
 
     thetadif = thetaold - thetanew
 
-    #get average z-position ("hight") of subcomplexes
+    #get average z-position ("height") of subcomplexes
     uniqueSub= np.unique(ringMember) # unique array of subcomplexes
     h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
 
