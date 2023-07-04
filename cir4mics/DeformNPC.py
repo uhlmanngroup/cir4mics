@@ -704,6 +704,9 @@ def Change_radius(r, rnew=False, rsigma=False, seed=None):
 
 
 def Change_dist(zold, ringMember, nup_i, refNup = False, rel = False, dnew=False, dsigma=False, seed=None):
+    if (dnew == False or dnew == None) and (dsigma == False or dsigma == None):
+        return zold
+
     z = np.array(zold)
     uniqueSub = np.unique(ringMember) # unique array of subcomplexes
     h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
@@ -717,6 +720,8 @@ def Change_dist(zold, ringMember, nup_i, refNup = False, rel = False, dnew=False
         hmax = np.max(href)
         hmin = np.min(href)
 
+
+
         h = np.array(h)
 
         for memberof in np.intersect1d(uniqueSubref, uniqueSub): # replace values in h for their counterparts in href
@@ -728,6 +733,10 @@ def Change_dist(zold, ringMember, nup_i, refNup = False, rel = False, dnew=False
         hmax = np.max(h)
         hmin = np.min(h)
 
+    if (hmin == hmax):
+            raise ValueError("Cannot change distance of Nups within one subcomplex. Select different Nups, "
+                            "change the order of Nups when var[\"rel\"] = True, or set ring distance var[\"dnew\"] and "
+                            "var[\"dsigma\"] to None")
 
     if not (str(dnew) == "0" or str(dnew) == "0.0"):
         dnew = dnew if dnew else hmax-hmin
@@ -763,6 +772,9 @@ def Change_rotang(
     thetasigma=False,
     seed=None,
 ):
+    if (thetanew == False or thetanew == None) and (thetasigma == False or thetasigma == None):
+        return ringAnglesOld, thetaold
+
     ringAngles = np.array(ringAnglesOld)
 
     if not (str(thetanew) == "0" or str(thetanew) == "0.0"):
@@ -800,7 +812,10 @@ def Change_rotang(
         hmax = np.max(h)
         hmin = np.min(h)
 
-
+    if (hmin == hmax):
+            raise ValueError("Cannot change rotational angle of Nups within one subcomplex. Select different Nups, "
+                            "change the order of Nups when var[\"rel\"] = True, or set rotational angles var[\"thetanew\"] and "
+                            "var[\"thetasigma\"] to None")
 
 
     for memberof, i in zip(uniqueSub, range(len(uniqueSub))):
@@ -851,6 +866,9 @@ def MultipleNPCs_coord(
     zoffsets,
     symmet,
     NucSideBool,
+    ringmember,
+    ringmemall,
+    zexp,
     nupIndex,
     tiltnucv,
     tiltcytv,
@@ -885,12 +903,13 @@ def MultipleNPCs_coord(
 
     if not isinstance(tiltnucv, type(None)):  # TODO: tilt and shift do not commute
         for NPC in range(nNPCs):
-            NPCscoord = tilt(NPC, NPCscoord, NucSideBool, tiltnucv, tiltcytv)
+            #NPCscoord = tilt(NPC, NPCscoord, NucSideBool, tiltnucv, tiltcytv)
+            NPCscoord = tilt2(NPC, NPCscoord, NucSideBool, ringmember, ringmemall, zexp, tiltnucv, tiltcytv)
 
-    # shift rings
+            # shift rings
     if not isinstance(shiftNuc, type(None)):
         for NPC in range(nNPCs):
-            NPCscoord = shift(NPC, NPCscoord, NucSideBool, shiftNuc, shiftCyt)
+            NPCscoord = shift(NPC, NPCscoord, ringmember, ringmemall, zexp, shiftNuc, shiftCyt)
 
     return NPCscoord
 
@@ -905,6 +924,41 @@ def shiftvectors(shiftsigma, nNPCs, seed):
         shiftNuc = np.zeros([nNPCs, dim])
         shiftCyt = np.zeros([nNPCs, dim])
     return shiftNuc, shiftCyt
+
+
+def tilt2(NPC, NPCscoord, NucSideBool,  ringmember, ringmemall, zexp, tiltnucv, tiltcytv):
+    """NPC: index of NPC
+    NPCscoord: coordinates of all NPCs, not shifted,
+    NucSideBool: array, True for each node on the nucleoplasmic side
+    tiltnucv: for each NPC, rotational vector defining tilt of nucleoplasmic rings
+    tiltcytv: for each NPC, rotational vector defining tilt of cytoplasmic rings
+    """
+
+    uniqueSub = np.unique(ringmember)
+    h = [np.mean(zexp[ringmember==[memberof]]) for memberof in uniqueSub]
+
+    if (np.min(h) == np.max(h)):
+            raise ValueError("Cannot change tilt of Nups within one subcomplex. Select different Nups, "
+                            "or set var[\"kappa\"] to None")
+
+    cytratio = [(i - np.min(h)) / (np.max(h) - np.min(h)) for i in h]
+    subtilt = [cytratio[i] * tiltcytv[NPC] + (1-cytratio[i]) * tiltnucv[NPC] for i in range(len(cytratio))]
+
+    baseZ = np.array([0, 0, 1])
+
+    for member in uniqueSub:
+        sub_of_NPCBool = np.logical_and(NPCscoord[:, 4] == NPC, ringmemall == member)
+        i = np.where(uniqueSub == member)[0][0]
+        NPCscoordsSub = np.array(NPCscoord[sub_of_NPCBool, :3])
+        meanz = np.mean(NPCscoord[sub_of_NPCBool, 2])  # mean Z position of subcomplex
+        NPCscoordsSub[:, 2] -= meanz
+        NPCscoord[sub_of_NPCBool, :3] = Analyse_deformed.rodrigues_rot(
+            NPCscoordsSub, baseZ, subtilt[i]
+        )
+        NPCscoord[sub_of_NPCBool, 2] += meanz
+
+
+    return NPCscoord
 
 
 def tilt(NPC, NPCscoord, NucSideBool, tiltnucv, tiltcytv):
@@ -940,20 +994,29 @@ def tilt(NPC, NPCscoord, NucSideBool, tiltnucv, tiltcytv):
     NPCscoord[Cyt_of_NPCBool, 2] += meanzC
     return NPCscoord
 
-
-def shift(NPC, NPCscoord, NucSideBool, shiftNuc, shiftCyt):
+def shift(NPC, NPCscoord, ringmember, ringmemall, zexp, shiftNuc, shiftCyt):
     """NPC: index of NPC
     NPCscoord: coordinates of all NPCs, not shifted,
-    NucSideBool: array, True for each node on the nucleoplasmic side
     shiftNuc: for each NPC, vector defining shift of nucleoplasmic rings
     shiftCyt: for each NPC, vector defining shift of cytoplasmic rings
     """
 
-    Nuc_of_NPCBool = np.logical_and(NPCscoord[:, 4] == NPC, NucSideBool)
-    Cyt_of_NPCBool = np.logical_and(NPCscoord[:, 4] == NPC, np.invert(NucSideBool))
+    uniqueSub = np.unique(ringmember)
+    h = [np.mean(zexp[ringmember==[memberof]]) for memberof in uniqueSub]
 
-    NPCscoord[Nuc_of_NPCBool, :2] += shiftNuc[NPC]
-    NPCscoord[Cyt_of_NPCBool, :2] += shiftCyt[NPC]
+    if (np.min(h) == np.max(h)):
+            raise ValueError("Cannot change shift of Nups within one subcomplex. Select different Nups, "
+                            "change the order of Nups when var[\"rel\"] = True, or set var[\"shiftsigma\"] to None")
+
+    cytratio = [(i-np.min(h))/(np.max(h)-np.min(h)) for i in h]
+
+    subshift = [cytratio[i]*shiftCyt[NPC] + (1-cytratio[i]) * shiftNuc[NPC] for i in range(len(cytratio))]
+
+    for member in uniqueSub:
+        sub_of_NPCBool = np.logical_and(NPCscoord[:, 4] == NPC, ringmemall == member)
+        i = np.where(uniqueSub == member)[0][0]
+        NPCscoord[sub_of_NPCBool, :2] += subshift[i]
+
     return NPCscoord
 
 
