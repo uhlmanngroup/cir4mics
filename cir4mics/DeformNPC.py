@@ -469,6 +469,7 @@ def MultipleNPC(
     step=0.25,
     seed=None,
     kmult=1,
+    expansion=1,
     **kwargs
 ):
     """
@@ -511,11 +512,15 @@ def MultipleNPC(
             + str(nConnect)
             + "."
         )
-
+    mag *= expansion
+    zmag *= expansion
     selectedNup = SelectNup(nup, term, model)
 
     r = selectedNup.r
-    z = selectedNup.z
+    r = [ri * expansion for ri in r]
+    if rsigma: rsigma *= expansion
+    z = selectedNup.z*expansion
+    if dsigma: dsigma *= expansion
     ringAngles = selectedNup.ringAngles
     nup_i = selectedNup.nupindex
     ringMember = selectedNup.ringmember
@@ -651,7 +656,6 @@ def MultipleNPC(
         nConnect=nConnect,
         seed=seeds[i],
     ).r
-
     ringAngles_corrected = (
         deformNPC_temp.ringAngles_corrected
     )  # for NPCs that aren't 8-fold symmetric
@@ -710,7 +714,6 @@ def Change_dist(zold, ringMember, nup_i, refNup = False, rel = False, dnew=False
     z = np.array(zold)
     uniqueSub = np.unique(ringMember) # unique array of subcomplexes
     h = [np.mean(zold[ringMember==[memberof]]) for memberof in uniqueSub] # z position of all subcomplexes
-
     if rel:
         uniqueSubref = np.unique(refNup.ringmember) # unique array of reference nup subcomplexes
         zfilter = np.logical_and(nup_i == refNup.nupindex[0], np.isin(ringMember, uniqueSubref)) #True for each ref Nup that shares a subcomplex with a non-ref nup
@@ -908,6 +911,7 @@ def MultipleNPCs_coord(
 
             # shift rings
     if not isinstance(shiftNuc, type(None)):
+
         for NPC in range(nNPCs):
             NPCscoord = shift(NPC, NPCscoord, ringmember, ringmemall, zexp, shiftNuc, shiftCyt)
 

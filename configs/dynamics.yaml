@@ -48,3 +48,6 @@ kmult: 1 # Multiplier for spring constants of circumferential springs
 # Dynamics
 tlast: 200 # last timepoint for simulation. 
 step: 1 # timesteps for animation
+
+# Other microscopy techniques:
+expansion: 1 # expansion factor for expansion microscopy
