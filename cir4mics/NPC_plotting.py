@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -32,7 +33,7 @@ Pos3D = DeformNPC.Pos3D
 Sol3D = DeformNPC.Sol3D
 
 
-
+# %%
 class plotOverview:
     def __init__(
         self,
@@ -225,6 +226,7 @@ class plotOverview:
 
         ax.axis("scaled")
         fig.tight_layout()
+        plt.show()
 
 
 def plotEllipse(NPC):
@@ -1298,6 +1300,11 @@ class gethistdata:
         :param width: Width of plot, defaults to 5 
         :param bins: Number of bins to be plotted. If None, the number of bins will be automatically determined. Defaults to None
         """
+
+        if len(np.unique(NPCs["ringmember"])) != 2:
+            warn("Histogram of features can currently only be generated for NPCs with two subcomplexes")
+            return
+
         self.width = width
         self.bins = bins
         # featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)
@@ -1307,7 +1314,9 @@ class gethistdata:
         self.rc1 = featuresAll[:, 0]  # circle radius
         self.qe1 = featuresElAll[:, 2]  # minor/major axis ratio
         self.RSSe1 = featuresElAll[:, 4]  # RSS 3D
-        self.tilte1 = Analyse_deformed.angles(featuresel3DAll[:, 6:])  # tilt angles
+        # featuresel3D contains centres of the fitted ellipse and tilt-angles. Findin ginde for tilt-angle:
+        tilti = int(len(featuresel3DAll[0, :])/2)
+        self.tilte1 = Analyse_deformed.angles(featuresel3DAll[:, tilti:])  # tilt angles
         self.shifte1, self.diste1 = Analyse_deformed.findshiftEl(featuresel3DAll)
         self.featureHist(
             [self.rc1, self.qe1, self.RSSe1, self.tilte1, self.shifte1, self.diste1]
@@ -1344,7 +1353,6 @@ class gethistdata:
             iqr = np.subtract(*np.percentile(data, [75, 25]))
             binwidth = 2 * iqr * (len(data) ** (-1 / 3))
             bins = int((data.max() - data.min()) / binwidth)
-            # print(bins)
         else:
             bins = 20
 

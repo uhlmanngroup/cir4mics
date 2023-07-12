@@ -27,11 +27,7 @@ def getNPCs(var):
     :param var: dictionary of simulation parameters
     returns: Dictionary containing simulated NPCs and their metadata
     """
-
     return DeformNPC.MultipleNPC(**var)
-    # return DeformNPC.MultipleNPC(var["nup"], var["term"], var["model"], n = var["n"], rel = var["rel"], rvar=var["rvar"],
-    #                                  thetavar = var["thetavar"], dvar = var["dvar"], symmet = var["symmet"],
-    #                                  elliptvar = var["elliptvar"], mag = var["mag"], zmag = var["zmag"], seed = var["seed"])
 
 
 
@@ -86,17 +82,27 @@ def getNPCcoords(NPCs, var, offset:bool=False, offsetmult = 1, justoffset:bool =
     zoffsets = NPCs["zoffsets"]
     NucSideBool = NPCs["nuclear_side_boolean"]
 
+    ringmember = NPCs["ringmember"]
+    ringmemall = NPCs["ringmemall"]
+    zexp= NPCs["zexp"]
+
     tiltnucv, tiltcytv = DeformNPC.tiltvectors(var["kappa"], var["n"], var["seed"])
     shiftNuc, shiftCyt = DeformNPC.shiftvectors(
         var["shiftsigma"], var["n"], var["seed"]
     )
 
+    if not isinstance(shiftNuc, type(None)):
+        shiftNuc *= var["expansion"]
+        shiftCyt *= var["expansion"]
 
     NPCscoords = DeformNPC.MultipleNPCs_coord(
         npcs,
         zoffsets,
         var["symmet"],
         NucSideBool,
+        ringmember,
+        ringmemall,
+        zexp,
         nupIndex,
         tiltnucv,
         tiltcytv,

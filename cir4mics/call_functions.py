@@ -22,15 +22,15 @@ config = "../configs/config.yaml"
 var = npc.getVars(config)  # Transform config file into a python dictionary
 
 #### Adjust simulation parameters
-var["n"] = 1  # Number of NPCs to be simulated
+var["n"] = 4  # Number of NPCs to be simulated
 NPCi = (
     0  # index out of n of NPC to be shown in any detail-plot or animation. 0-indexed.
 )
-var["seed"] = 54649  # seed for reproducibility. Any number but 0
+var["seed"] = 54648  # seed for reproducibility. Any number but 0
 
 ## Select one or more nups, their terminus, and an NPC model for simulation
-var["nup"] = ("nup96", "nup188", "nup155")
-var["term"] = ("N", "N", "N")
+var["nup"] = ("nup96",)# "nup188", "nup155")
+var["term"] = ("N",)# "N", "N")
 var["model"] = "7R5J"
 var["rel"] = True # remove the "#" before var["rel"] = True to select the first nup as reference
 
@@ -52,9 +52,9 @@ var["rel"] = True # remove the "#" before var["rel"] = True to select the first 
 # var["dsigma"] = None # Standard deviation ring distance. Positive number float or int
 
 # var["kappa"] =  None # Controls tilt of individual rings, Kappa of von-mises fisher distribution. Positive number float or int or 0
-var[
-    "shiftsigma"
-] = 10  # Controls shift of individual rings. Standard deviation of 0-centred normal [nm]
+# var[
+#     "shiftsigma"
+# ] = None  # Controls shift of individual rings. Standard deviation of 0-centred normal [nm]
 
 # # Twist between nucleoplasmic and cytoplasmic ring
 # var["thetanew"] = None # Mean twist angle [rad]
@@ -64,7 +64,7 @@ var[
 # var["elliptsigma"] = None # Standard deviation of semiminor/semimajor axis ratio
 #
 # ########################
-var["expansion"] = 2
+#var["le"] = 1 # labelling efficiency
 
 #### Run simulations
 NPCs = npc.getNPCs(var)  # Dictionary of all simulated NPCs
@@ -117,5 +117,6 @@ if export:
 
     ## features per subcomplex
     exportCSV.featuresCSV_subcomplex(NPCs, circle_CRNR, ellipse_CRNR, name, data_dir)
+    print("hello")
 
 # %%

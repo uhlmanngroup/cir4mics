@@ -101,6 +101,12 @@ class MakeCSV:
         
        """
 
+        if var["le"] < 1:
+            np.random.seed(var["seed"])
+            labelled = np.random.choice([True, False], len(printNPC), p = [var["le"], 1 - var["le"]])
+            printNPC = printNPC[labelled]
+            print(len(printNPC)/(32*4))
+
         self.csvpath = data_dir + name + ".csv"
         with open(self.csvpath, "w", newline="") as csvfile:
             writer1 = csv.writer(
@@ -124,6 +130,11 @@ class MakeCSV:
         f.write(nameDict["modelname"] + "\n")
 
         f.write("random seed: " + str(var["seed"]) + "\n")
+        if var["expansion"] != 1:
+            f.write("expansion factor: " + str(var["expansion"]) + "x\n")
+        if var["le"] != 1:
+            f.write("Labelling efficiency: " +str(var["le"]*100) + "%\n")
+
         f.write("\nmodel layout: ###########\n")
 
         # f.write("kr = 0.7 \n")
@@ -186,8 +197,8 @@ class MakeCSV:
             )
         if nameDict["shiftStr"]:
             f.write(
-                "shift of rings (sigma of 0-centered normal, nm): "
-                + str(var["shiftsigma"])
+                "shift of rings (sigma of 0-centered normal, nm), considering expansion: "
+                + str(var["shiftsigma"] * var["expansion"])
                 + "\n"
             )
         f.close()

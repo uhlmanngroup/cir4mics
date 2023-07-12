@@ -51,3 +51,4 @@ step: 1 # timesteps for animation
 
 # Other microscopy techniques:
 expansion: 1 # expansion factor for expansion microscopy
+le: 1 # labelling efficiency, ratio of successful labels. Only affects final CSV
