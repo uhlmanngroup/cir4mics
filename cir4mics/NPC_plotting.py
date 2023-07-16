@@ -1400,3 +1400,155 @@ class gethistdata:
         # fig.legend(handles, labels, loc='upper center')
 
         plt.tight_layout()
+        plt.show()
+
+class gethistdata2:
+    def __init__(
+        self, var, NPCs, featuresAll, featuresElAll, featuresel3DAll, featuresAll2, featuresElAll2, featuresel3DAll2, width=5, bins=None
+    ):
+        """
+        Plots the distribution of different features for all NPCs. Features are
+        NPC radius, minor/major axis ratio of an ellipse, residual sum of squares of a ring-wise fitted ellipse,
+        difference in tilt in radians between the nucleoplasmic and cytoplasmic rings, determined using ellipses to the respective subcomplexes.
+        shift of nucleoplasmic and cytoplasmic ring, determined using ellipses fitted to the respective subcomplexes.
+        Distance between the centroid of the nucleoplasmic and cytoplasmic ring, determined using ellipses fitted to the respective subcomplexes.
+        :param var: Dictionary of simulation parameters
+        :param NPCs: Dictionary containing simulated NPCs and their metadata
+        :param featuresAll: features of the NPC determined by fitting circles. From Analyse_deformed.meanfeaturesC()
+        :param featuresElAll: features of the NPC determined by fitting ellipses. From Analyse_deformed.meanfeaturesE()
+        :param featuresel3DAll: centre and tilt of NeafasdfPC subcomplexes determined by fitting ellipses. from exportCSV.colfeaturesEl3D.
+        :param width: Width of plot, defaults to 5
+        :param bins: Number of bins to be plotted. If None, the number of bins will be automatically determined. Defaults to None
+        """
+
+        if len(np.unique(NPCs["ringmember"])) != 2:
+            warn("Histogram of features can currently only be generated for NPCs with two subcomplexes")
+            return
+
+        self.width = width
+        self.bins = bins
+        # featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings)
+        # featuresElAll = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
+        # _, _, _, _, featuresel3DAll = exportCSV.col_features(NPCs, circle_CRNR, ellipse_CRNR)
+
+        self.rc1 =  featuresAll[:, 0] # circle radius
+        self.qe1 = featuresElAll[:, 2]  # minor/major axis ratio
+        self.RSSe1 = featuresElAll[:, 4]  # RSS 3D
+        # featuresel3D contains centres of the fitted ellipse and tilt-angles. Findin ginde for tilt-angle:
+        tilti = int(len(featuresel3DAll[0, :])/2)
+        self.tilte1 = Analyse_deformed.angles(featuresel3DAll[:, tilti:])  # tilt angles
+        self.shifte1, self.diste1 = Analyse_deformed.findshiftEl(featuresel3DAll)
+
+        self.rc2 = featuresAll2[:, 0]  # circle radius
+        self.qe2 = featuresElAll2[:, 2]  # minor/major axis ratio
+        self.RSSe2 = featuresElAll2[:, 4]  # RSS 3D
+        # featuresel3D contains centres of the fitted ellipse and tilt-angles. Findin ginde for tilt-angle:
+        tilti2 = int(len(featuresel3DAll2[0, :])/2)
+        self.tilte2 = Analyse_deformed.angles(featuresel3DAll2[:, tilti2:])  # tilt angles
+        self.shifte2, self.diste2 = Analyse_deformed.findshiftEl(featuresel3DAll2)
+
+
+
+        self.featureHist(
+            [self.rc1, self.qe1, self.RSSe1, self.tilte1, self.shifte1, self.diste1],[self.rc2, self.qe2, self.RSSe2, self.tilte2, self.shifte2, self.diste2]
+        )
+
+    #   return [rc1, qe1, RSSe1, tilte1, shifte1, diste1]
+        plt.tight_layout()
+        plt.show()
+
+    def featureHist(self, features1, features2):
+        print("test")
+        rows = 1
+        cols = 3
+        name = [
+            "radius [nm]",
+            "minor/major ellip.",
+            "RSS ellip. [nm]",
+            "tilt-dif. ellip. [rad]",
+            "shift ellip. [nm]",
+            "dist ellip [nm]",
+        ]
+
+        plt.rcParams.update({"font.size": self.width * 1.5})
+
+        fig, ax = plt.subplots(
+            rows, cols, figsize=(self.width * 0.8, self.width*0.25), sharey=True
+        )
+        # bins = int(len(features1[0])/10) #50
+
+        data = features1[0]
+        data2 = features2[0]
+
+        if self.bins:
+            bins = self.bins
+        elif data.max() - data.min():
+            # determine number of bins via Freedman-Diaconis
+
+            iqr = np.subtract(*np.percentile(data, [75, 25]))
+            binwidth = 2 * iqr * (len(data) ** (-1 / 3))
+            bins = int((data.max() - data.min()) / binwidth)
+        else:
+            bins = 20
+
+        kwargs = dict(histtype="stepfilled", alpha=0.5, bins=bins, ec="k", linewidth=3)
+
+        for i in range(rows):
+            for j in range(cols):
+                k = int(i * 2 + j * 1)
+
+                if k == 0:  # set label only for first plot
+                    label1 = "$D_{mag}$: 1, $r_\sigma$: 2"
+                    label2 = "$D_{mag}$: 20, $r_\sigma$: 0$"
+                else:
+                    label1 = None
+
+                ax[k].hist(features2[k], color="magenta", label=label1, **kwargs)
+                ax[k].hist(features1[k], color="cyan", label=label1, **kwargs)
+
+
+                ax[k].set_ylim([0, 200])
+                ax[k].set_yticks([0, 100])
+                ax[k].set_xlabel(name[k])
+
+        ax[0].set_ylabel("n NPCs")
+
+        feat1rmean = np.mean(features1[0])
+        meanrlabel = "$\\bar{r}$: " + str(round(feat1rmean, 2))
+        ax[0].axvline(x=feat1rmean, color='darkcyan', linestyle = "--", label= meanrlabel, linewidth = 3)
+
+        feat2rmean = np.mean(features2[0])
+        meanrlabel2 = "$\\bar{r}$: " + str(round(feat2rmean, 2))
+        ax[0].axvline(x=feat2rmean, color='darkmagenta', linestyle = "-", label= meanrlabel, linewidth = 3)
+
+        def pdffeats(features, i, j, color, label=None, linestyle="-"):
+            k = int(i * 2 + j * 1)
+
+            # i and j are ax indices
+            mu, std = norm.fit(features)
+
+            # find area under curve
+            values, bns, _ = ax[k].hist(features, bins=bins, alpha=0, linewidth=5)
+            area = sum(np.diff(bns) * values)
+
+            xmin, xmax = min(bns), max(bns)
+            x = np.linspace(xmin, xmax, 100)
+            p = norm.pdf(x, mu, std) * area  # (xmax-xmin)/bins
+            # label = None
+            ax[k].plot(x, p, color, linewidth=3, linestyle=linestyle, label=label)
+
+        color1 = "dimgrey"
+        pdffeats(features1[0], 0, 0, color1)#, linestyle="--")
+        pdffeats(features1[1], 0, 1, color1)#, linestyle="--")
+        # pdffeats(features1[5], 2, 1, color1)#, linestyle="--")
+
+        color2 = "dimgrey"
+        pdffeats(features2[0], 0, 0, color2)
+        pdffeats(features2[1], 0, 1, color2)
+        # pdffeats(features2[5], 2, 1, color2)
+
+        fig.legend(ncol = 4)
+        # fig.legend.get_frame().set_facecolor((0, 0, 1, 0.1))
+        # handles, labels = ax.get_legend_handles_labels()
+        # fig.legend(handles, labels, loc='upper center')
+
