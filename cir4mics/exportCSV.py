@@ -105,7 +105,6 @@ class MakeCSV:
             np.random.seed(var["seed"])
             labelled = np.random.choice([True, False], len(printNPC), p = [var["le"], 1 - var["le"]])
             printNPC = printNPC[labelled]
-            print(len(printNPC)/(32*4))
 
         self.csvpath = data_dir + name + ".csv"
         with open(self.csvpath, "w", newline="") as csvfile:

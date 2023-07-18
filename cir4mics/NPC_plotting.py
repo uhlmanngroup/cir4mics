@@ -1458,7 +1458,6 @@ class gethistdata2:
         plt.show()
 
     def featureHist(self, features1, features2):
-        print("test")
         rows = 1
         cols = 3
         name = [
@@ -1470,7 +1469,7 @@ class gethistdata2:
             "dist ellip [nm]",
         ]
 
-        plt.rcParams.update({"font.size": self.width * 1.5})
+        plt.rcParams.update({"font.size": self.width * 1.25})
 
         fig, ax = plt.subplots(
             rows, cols, figsize=(self.width * 0.8, self.width*0.25), sharey=True
@@ -1498,12 +1497,13 @@ class gethistdata2:
                 k = int(i * 2 + j * 1)
 
                 if k == 0:  # set label only for first plot
-                    label1 = "$D_{mag}$: 1, $r_\sigma$: 2"
-                    label2 = "$D_{mag}$: 20, $r_\sigma$: 0$"
+                    label2 = "$D_{mag}$: 1, $r_\sigma$: 2"
+                    label1 = "$D_{mag}$: 20, $r_\sigma$: 0"
                 else:
                     label1 = None
+                    label2 = None
 
-                ax[k].hist(features2[k], color="magenta", label=label1, **kwargs)
+                ax[k].hist(features2[k], color="magenta", label=label2, **kwargs)
                 ax[k].hist(features1[k], color="cyan", label=label1, **kwargs)
 
 
@@ -1514,12 +1514,14 @@ class gethistdata2:
         ax[0].set_ylabel("n NPCs")
 
         feat1rmean = np.mean(features1[0])
-        meanrlabel = "$\\bar{r}$: " + str(round(feat1rmean, 2))
+        feat1std = np.std(features1[0])
+        meanrlabel = "$\\bar{r}$: " + str(round(feat1rmean, 2)) + "$\pm$" + str(round(feat1std, 2))
         ax[0].axvline(x=feat1rmean, color='darkcyan', linestyle = "--", label= meanrlabel, linewidth = 3)
 
         feat2rmean = np.mean(features2[0])
-        meanrlabel2 = "$\\bar{r}$: " + str(round(feat2rmean, 2))
-        ax[0].axvline(x=feat2rmean, color='darkmagenta', linestyle = "-", label= meanrlabel, linewidth = 3)
+        feat2std = np.std(features2[0])
+        meanrlabel2 = "$\\bar{r}$: " + str(round(feat2rmean, 2))+ "$\pm$" + str(round(feat2std, 2))
+        ax[0].axvline(x=feat2rmean, color='darkmagenta', linestyle = "-", label= meanrlabel2, linewidth = 3)
 
         def pdffeats(features, i, j, color, label=None, linestyle="-"):
             k = int(i * 2 + j * 1)
@@ -1547,8 +1549,9 @@ class gethistdata2:
         pdffeats(features2[1], 0, 1, color2)
         # pdffeats(features2[5], 2, 1, color2)
 
-        fig.legend(ncol = 4)
-        # fig.legend.get_frame().set_facecolor((0, 0, 1, 0.1))
-        # handles, labels = ax.get_legend_handles_labels()
-        # fig.legend(handles, labels, loc='upper center')
+        #fig.legend(ncol = 4)
+        fig.legend(facecolor='white', framealpha=0.8, ncol = 4)
+        #fig.legend.get_frame().set_facecolor((0, 0, 1, 0.1))
+#        handles, labels = ax.get_legend_handles_labels()
+#        fig.legend(handles, labels, loc='upper center')
 

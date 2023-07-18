@@ -9,12 +9,12 @@ Created on Fri Feb 17 13:30:07 2023
 #### Simulating structurally variable NPCs for microscpy ####
 ###
 from cir4mics import exportCSV, npc, NPC_plotting, Analyse_deformed
-# import exportCSV, npc, NPC_plotting, Analyse_deformed
+#import exportCSV, npc, NPC_plotting, Analyse_deformed
 #import utility
 
 # import numpy as np
 
-export = True  # set to True to export data
+export = False  # set to True to export data
 
 data_dir = "./data/"  # Directory for output files
 
@@ -22,31 +22,31 @@ config = "../configs/config.yaml"
 var = npc.getVars(config)  # Transform config file into a python dictionary
 
 #### Adjust simulation parameters
-var["n"] = 4  # Number of NPCs to be simulated
+var["n"] = 1  # Number of NPCs to be simulated
 NPCi = (
     0  # index out of n of NPC to be shown in any detail-plot or animation. 0-indexed.
 )
-var["seed"] = 54648  # seed for reproducibility. Any number but 0
+var["seed"] = 51234  # seed for reproducibility. Any number but 0
 
 ## Select one or more nups, their terminus, and an NPC model for simulation
 var["nup"] = ("nup96",)# "nup188", "nup155")
-var["term"] = ("N",)# "N", "N")
-var["model"] = "7R5J"
-var["rel"] = True # remove the "#" before var["rel"] = True to select the first nup as reference
+var["term"] = ("C",)# "N", "N")
+var["model"] = "5A9Q"
+var["rel"] = False # remove the "#" before var["rel"] = True to select the first nup as reference
 
 #### Variability parameters
 ### Irregular variability
-# var[
-#     "mag"
-# ] = 20  # Magnitude of irregular variability. 0: No deformation, 15: Strong deformation
-# var["zmag"] = var["mag"] / 2  # magnitude of offset in z. Not computed via springs
+var[
+    "mag"
+] = 0  # Magnitude of irregular variability. 0: No deformation, 15: Strong deformation
+var["zmag"] = var["mag"] / 2  # magnitude of offset in z. Not computed via springs
 
 ######################### Geometric variability
 # var["symmet"] = 8 # Symmetry of simulated NPCs
 
 ## Mean taken from input-model if "None"
 # var["rnew"] = None # Mean radius [nm]. Positive number float or int
-#var["rsigma"] = None # Standard-deviation radius. . Positive number float or int
+# var["rsigma"] = None # Standard-deviation radius. . Positive number float or int
 
 # var["dnew"] = None # Mean ring distance [nm]. Positive number float or int
 # var["dsigma"] = None # Standard deviation ring distance. Positive number float or int
@@ -65,6 +65,7 @@ var["rel"] = True # remove the "#" before var["rel"] = True to select the first 
 #
 # ########################
 #var["le"] = 1 # labelling efficiency
+# var["expansion"] = 1 # Expansion factor to simulate expansion microscopy 
 
 #### Run simulations
 NPCs = npc.getNPCs(var)  # Dictionary of all simulated NPCs
@@ -91,13 +92,17 @@ ellipse_CRNR = Analyse_deformed.ellipses(NPCscoords, membership=NPCs["ringmemall
 circle_allrings = Analyse_deformed.circles(NPCscoords, membership=NPCs["z_i_all"])
 circle_CRNR = Analyse_deformed.circles(NPCscoords, membership=NPCs["ringmemall"])
 
+
+
 # Compute further features
 featuresAll = Analyse_deformed.meanfeaturesC(NPCs, var, circle_allrings) # featuresAll: r, sqsum, residual, zsqsum of circle per NPC
 featuresElAll = Analyse_deformed.meanfeaturesE(NPCs, var, ellipse_allrings)
 featuresel3DAll = exportCSV.colfeaturesEl3D(NPCs, ellipse_CRNR) # featuresel3DAll: centre subcomplex, 1 centre subcomplex 2, centre subcomplex n, tilt subcomplex 1, tilt subcomplex 2 ...
 
+
 ## Show histogram of features
-NPC_plotting.gethistdata(var, NPCs, featuresAll, featuresElAll, featuresel3DAll, width = 5, bins = None)
+NPC_plotting.gethistdata(var, NPCs, featuresAll, featuresElAll, featuresel3DAll, width = 5, bins = 20)
+
 
 #### Export data
 ## All NPC coordinates and metadata
@@ -117,6 +122,5 @@ if export:
 
     ## features per subcomplex
     exportCSV.featuresCSV_subcomplex(NPCs, circle_CRNR, ellipse_CRNR, name, data_dir)
-    print("hello")
 
-# %%
+
