@@ -75,6 +75,7 @@ Run from within the poetry shell and the right working directory (see above).
 - Load cir4mics/cir4mics/call_functions.py
 
 ### How to include new models to the simulator 
+New models can be defined manually, or using structural models from PDB.  
 `jupyter-lab notebooks/Include_models.ipynb`
 
 ### How to simulate temporal dynamics 
