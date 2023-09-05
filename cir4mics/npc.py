@@ -91,9 +91,11 @@ def getNPCcoords(NPCs, var, offset:bool=False, offsetmult = 1, justoffset:bool =
         var["shiftsigma"], var["n"], var["seed"]
     )
 
+
     if not isinstance(shiftNuc, type(None)):
-        shiftNuc *= var["expansion"]
-        shiftCyt *= var["expansion"]
+        if len(np.unique(ringmember)) > 1: # if members of more than one subcomplex are present ...
+            shiftNuc *= var["expansion"]
+            shiftCyt *= var["expansion"]
 
     NPCscoords = DeformNPC.MultipleNPCs_coord(
         npcs,

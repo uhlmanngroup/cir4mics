@@ -444,7 +444,6 @@ def fitCircle3D(NPC):
 
     basisZ = np.array([0, 0, 1])
     rotate = False if np.array_equal(basisZ, normal2) else True
-    #print(rotate)
 
     NPC_xy = rodrigues_rot(NPC_centered, normal2, basisZ) if rotate else NPC_centered  #
 

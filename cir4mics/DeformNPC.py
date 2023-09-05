@@ -911,9 +911,10 @@ def MultipleNPCs_coord(
 
             # shift rings
     if not isinstance(shiftNuc, type(None)):
+        if len(np.unique(ringmember)) > 1:
 
-        for NPC in range(nNPCs):
-            NPCscoord = shift(NPC, NPCscoord, ringmember, ringmemall, zexp, shiftNuc, shiftCyt)
+            for NPC in range(nNPCs):
+                NPCscoord = shift(NPC, NPCscoord, ringmember, ringmemall, zexp, shiftNuc, shiftCyt)
 
     return NPCscoord
 

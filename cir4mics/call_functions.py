@@ -29,9 +29,10 @@ NPCi = (
 var["seed"] = 51234  # seed for reproducibility. Any number but 0
 
 ## Select one or more nups, their terminus, and an NPC model for simulation
-var["nup"] = ("nup96",)# "nup188", "nup155")
-var["term"] = ("C",)# "N", "N")
-var["model"] = "5A9Q"
+
+var["nup"] = ("Nup96",)#"ELYS")#, "Nup96")
+var["term"] = ("N",)#"N")#, "C")# "N")
+var["model"] = "7R5J"
 var["rel"] = False # remove the "#" before var["rel"] = True to select the first nup as reference
 
 #### Variability parameters
@@ -52,9 +53,9 @@ var["zmag"] = var["mag"] / 2  # magnitude of offset in z. Not computed via sprin
 # var["dsigma"] = None # Standard deviation ring distance. Positive number float or int
 
 # var["kappa"] =  None # Controls tilt of individual rings, Kappa of von-mises fisher distribution. Positive number float or int or 0
-# var[
-#     "shiftsigma"
-# ] = None  # Controls shift of individual rings. Standard deviation of 0-centred normal [nm]
+var[
+    "shiftsigma"
+] = None  # Controls shift of individual rings. Standard deviation of 0-centred normal [nm]
 
 # # Twist between nucleoplasmic and cytoplasmic ring
 # var["thetanew"] = None # Mean twist angle [rad]
@@ -65,7 +66,7 @@ var["zmag"] = var["mag"] / 2  # magnitude of offset in z. Not computed via sprin
 #
 # ########################
 #var["le"] = 1 # labelling efficiency
-# var["expansion"] = 1 # Expansion factor to simulate expansion microscopy 
+# var["expansion"] = 1 # Expansion factor to simulate expansion microscopy
 
 #### Run simulations
 NPCs = npc.getNPCs(var)  # Dictionary of all simulated NPCs
@@ -122,5 +123,6 @@ if export:
 
     ## features per subcomplex
     exportCSV.featuresCSV_subcomplex(NPCs, circle_CRNR, ellipse_CRNR, name, data_dir)
+
 
 

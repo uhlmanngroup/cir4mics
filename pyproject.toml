@@ -18,10 +18,10 @@ seaborn = "^0.12.2"
 sympy = "^1.11.1"
 ipympl = "^0.9.3"
 gemmi = "^0.6.0"
+ipykernel = "6.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
-spyder = "^5.4.2"
 black = "^23.3.0"
 
 [build-system]
