@@ -8,8 +8,11 @@ of user-defined magnitudes, simulate irregularly shaped variations.
 
 
 ## Requirements    
-- python, pip, git, jupyter-lab (or jupyter notebook) 
-https://pip.pypa.io/en/stable/installation/ 
+- python
+- pip (https://pip.pypa.io/en/stable/installation/)
+- git
+- jupyter-lab (or any application capable of running the Ipython notebooks under /notebooks. Jupyter notebook or PyCharm are other options) 
+
 
 ### Linux, macOS
 Open a terminal where you want to install the project  
