@@ -8,7 +8,7 @@ of user-defined magnitudes, simulate irregularly shaped variations.
 
 
 ## Requirements    
-- python, pip, git, jupyter-lab
+- python, pip, git, jupyter-lab (or jupyter notebook) 
 https://pip.pypa.io/en/stable/installation/ 
 
 ### Linux, macOS
@@ -55,7 +55,6 @@ Dependencies are installed according to pyproject.toml and poetry.lock
 `poetry install`  
 
 
-
 #### Run without IDE 
 If you are already aware of what's in call_functions.py (See Tutorials)
 
@@ -82,6 +81,10 @@ New models can be defined manually, or using structural models from PDB.
 Dynamics do not reflect true NPC dynamics, but might be useful when hard to predict dynamics are of interest 
 
 `jupyter-lab notebooks/Dynamics.ipynb` 
+
+### Information on simulating photophysics  
+
+`jupyter-lab notebooks/Notes_on_imaging_datasets.ipynb`
 
 
 ## Troubleshoothing (Installation via Option B)
